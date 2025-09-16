@@ -1,0 +1,317 @@
+Complete Bible Learning App Development Guide
+Architecture Overview
+Stack Decision Analysis:
+Backend: Django 5.1 + Django REST Framework 3.15
+Database: PostgreSQL 16
+Authentication: Django Simple JWT 5.3
+Containerization: Docker 24.0 + Docker Compose v2
+Frontend: Next.js 14 PWA (separate container)
+Deployment: DigitalOcean App Platform (recommended)
+Why This Stack (8/10 optimal):
+Django handles complex relationships in your ERD efficiently
+JWT stateless auth works perfectly with Docker scaling
+PostgreSQL JSON fields handle your tokenization needs
+No additional complexity from Redis/Celery/Nginx
+Backend Application Structure
+Core Django Project Layout
+backend/
+├── bible_app/              # Main project
+│   ├── settings/
+│   │   ├── base.py
+│   │   ├── development.py
+│   │   ├── production.py
+│   │   └── testing.py
+│   ├── urls.py
+│   └── wsgi.py
+├── apps/
+│   ├── authentication/     # Custom user management
+│   ├── users/             # User profiles & habits
+│   ├── bible/             # Books, verses, translations
+│   ├── decks/             # Deck management
+│   ├── learning/          # Spaced repetition logic
+│   └── api/               # API serializers & views
+├── requirements/
+│   ├── base.txt
+│   ├── development.txt
+│   └── production.txt
+├── Dockerfile
+├── docker-compose.yml
+└── manage.py
+
+Database Design Implementation
+Critical PostgreSQL Considerations:
+Use UUID primary keys for users (matches your ERD)
+JSON fields for tokens_json, accessibility_json, response_json
+Composite indexes on (translation_id, book_id, chapter, verse_num)
+Partial indexes on due_at WHERE due_at <= now()
+Migration Strategy (7/10 complexity):
+Create initial migration with all tables
+Seed data migrations for books (66 canonical books), starting out we will use Job
+Translation data import (KJV as default)
+Use Django's bulk_create for verse imports (performance critical)
+Authentication & User Management
+JWT Implementation Requirements:
+ACCESS_TOKEN_LIFETIME: 15 minutes
+REFRESH_TOKEN_LIFETIME: 7 days
+ROTATE_REFRESH_TOKENS: True
+Custom JWT claims for user_id and permissions
+
+Multi-Provider Auth Strategy:
+Django Allauth 0.57 for Google OAuth2
+Apple Sign In via custom implementation
+Email/password via Django's built-in auth
+Single User model with provider tracking
+Session Management (Stateless Approach):
+No server-side sessions
+JWT in httpOnly cookies (CSRF protection)
+Refresh token rotation on each use
+Blacklist compromised tokens in database
+API Design & Data Flow
+RESTful API Structure
+Endpoints by Complexity:
+Low Complexity (2-4/10):
+GET /api/translations/ - List available translations
+GET /api/books/ - List books with testament grouping
+POST /api/auth/login/ - JWT authentication
+GET /api/user/profile/ - User profile data
+Medium Complexity (5-7/10):
+GET /api/verses/?book=1&chapter=1 - Filtered verse retrieval
+POST /api/decks/ - Create custom deck
+GET /api/learning/due/ - Due verses with SRS logic
+POST /api/reviews/ - Submit review attempt
+High Complexity (8-10/10):
+POST /api/learning/grade/ - Update spaced repetition state
+GET /api/analytics/progress/ - User statistics aggregation
+POST /api/verses/generate-cloze/ - Dynamic blank generation
+Data Serialization Strategy
+Use Django REST Framework serializers
+Nested serializers for related data (book→verses)
+Custom fields for computed properties (next_due, success_rate)
+Pagination on large datasets (verses, review_logs)
+Learning Engine Implementation
+Spaced Repetition Algorithm (SuperMemo2 variant)
+Core Logic (9/10 complexity):
+Ease factor starts at 2.5
+Interval calculation based on grade (0-5 scale)
+Grade 0-2: Reset interval, increment lapses
+Grade 3+: Multiply interval by ease factor
+Ease adjustment: +0.1 for grade 4+, -0.15 for grade <3
+Due Verse Selection:
+Query user_verse_state WHERE due_at <= now()
+Order by due_at ASC (oldest first)
+Limit to user's daily goal
+Include new verses when under daily limit
+Cloze (Fill-in-blank) Generation
+Three Implementation Options:
+Option 1: Regex-based (2/10 complexity)
+Remove every 5th-7th word
+Simple but predictable patterns
+Fast, no external dependencies
+Option 2: Pre-computed Database Storage (4/10 complexity)
+Generate blanks during verse import
+Store in tokens_json field
+Mark semantic words (nouns, verbs, adjectives)
+Best performance for runtime
+Option 3: NLP-based Dynamic Generation (8/10 complexity)
+Use spaCy 3.7 for POS tagging
+Remove theologically significant terms
+Context-aware blank selection
+Higher server resources required
+Recommendation: Start with Option 1, migrate to Option 2 for production.
+
+Docker Implementation
+Multi-Service Architecture
+Container Strategy:
+Single backend container (Django + gunicorn)
+PostgreSQL container with persistent volumes
+Frontend container (Next.js, separate repository)
+Docker Compose for development orchestration
+Production Docker Considerations
+Build Optimization (Critical):
+Multi-stage Dockerfile (builder + runtime)
+Python 3.12-slim base image
+Install system dependencies in builder stage
+Copy only requirements.txt first (layer caching)
+Use .dockerignore for faster builds
+Environment Management:
+Separate .env files per environment
+Docker secrets for production passwords
+Health check endpoint: /api/health/
+Graceful shutdown handling (SIGTERM)
+Resource Requirements:
+Development: 512MB RAM, 1 CPU
+Production: 1GB RAM, 2 CPU (minimum)
+Database: 2GB RAM, 10GB storage initially
+Data Management & Performance
+Bible Text Storage Strategy
+Database Storage Wins (8/10 recommendation):
+783,137 verses across translations
+~50MB compressed text data
+Eliminates API rate limits
+Enables offline functionality
+Predictable query performance
+Query Optimization Requirements
+Critical Indexes:
+user_verse_state(user_id, due_at) - Daily due verses
+verses(translation_id, book_id, chapter) - Chapter retrieval
+review_logs(user_id, ts) - Analytics queries
+deck_verses(deck_id, sort_order) - Ordered deck content
+Caching Strategy Without Redis:
+Django's database cache backend
+Cache verse text (rarely changes)
+Cache user statistics (daily refresh)
+Browser caching for static Bible content
+Push Notifications & PWA
+Notification Implementation
+Django Setup:
+django-push-notifications 3.1
+Store device tokens in user_profile
+Schedule via Django management commands
+Cron jobs for daily reminders
+PWA Integration:
+Service worker registration
+Push subscription management
+Notification permission handling
+Background sync for offline reviews
+Deployment & Hosting Analysis
+DigitalOcean App Platform (Recommended: 9/10)
+Cost Breakdown:
+Basic App: $12/month (512MB RAM)
+Managed PostgreSQL: $15/month (1GB RAM)
+Total: $27/month
+Advantages:
+Automatic Docker deployment
+Managed database backups
+SSL certificates included
+Simple scaling controls
+Alternative: AWS ECS Fargate
+Cost Breakdown:
+ECS Task: ~$20/month (0.5 vCPU, 1GB RAM)
+RDS PostgreSQL: ~$25/month (db.t3.micro)
+Load Balancer: $16/month
+Total: $61/month
+Higher complexity, better for scale.
+Alternative: Cloudflare Pages + D1
+Cost Breakdown:
+Pages: $0-5/month
+D1 Database: $5/month (limited)
+Total: $5-10/month
+Newest option, limited database features.
+Security Implementation
+Django Security Checklist
+Critical Settings:
+DEBUG = False in production
+ALLOWED_HOSTS properly configured
+SECURE_SSL_REDIRECT = True
+SECURE_HSTS_SECONDS = 31536000
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+JWT Security Measures
+Short access token lifetime (15 minutes)
+Secure refresh token storage
+Token blacklisting on logout
+Rate limiting on auth endpoints (django-ratelimit)
+Database Security
+Encrypted connections (require SSL)
+Separate database user with limited privileges
+Regular backup verification
+Environment variable secrets only
+Development Workflow
+Local Development Setup
+Docker Compose Services:
+web (Django development server)
+db (PostgreSQL with volume mounting)
+frontend (Next.js development server)
+Testing Strategy
+Test Coverage Requirements:
+Unit tests: Models, serializers, utilities
+Integration tests: API endpoints
+Load tests: Due verse queries, review submissions
+Use pytest-django, factory-boy for test data
+CI/CD Pipeline
+GitHub Actions Workflow:
+Run tests on pull requests
+Build and push Docker images
+Deploy to staging environment
+Database migration checks
+Performance Targets
+Response Time Goals
+Verse retrieval: <100ms
+Due verse calculation: <200ms
+Review submission: <150ms
+User analytics: <500ms
+Scalability Planning
+User Growth Estimates:
+MVP: 100 concurrent users
+6 months: 1,000 concurrent users
+Database growth: ~1GB per 10,000 active users
+Monitoring Requirements
+Django logging configuration
+Database query monitoring
+API response time tracking
+Error reporting (Sentry integration)
+Data Import & Management
+Bible Text Import Process
+Data Sources:
+API Bible (backup option)
+Open source Bible databases
+Public domain translations (KJV, ASV)
+Import Script Requirements:
+Bulk insert optimization (batch_size=1000)
+Translation metadata validation
+Duplicate verse detection
+Progress tracking for large imports
+User Data Migration
+Future Considerations:
+Export functionality (GDPR compliance)
+Backup/restore procedures
+Data anonymization for analytics
+Cross-platform sync capabilities
+Mobile PWA Considerations
+Offline Functionality
+Service worker for verse caching
+IndexedDB for review queue storage
+Background sync for submissions
+Offline indicator in UI
+Performance Optimization
+Lazy loading for large chapters
+Image optimization for minimal data
+Preload critical verses
+Compression for API responses
+Analytics & User Insights
+Key Metrics to Track
+Daily active users
+Verse completion rates
+Spaced repetition effectiveness
+Feature usage patterns
+Retention by acquisition source
+Privacy Compliance
+GDPR-compliant data collection
+User consent management
+Data retention policies
+Anonymous analytics where possible
+Future Scalability Considerations
+Horizontal Scaling Preparation
+Stateless application design (JWT helps)
+Database read replicas potential
+CDN integration for static content
+Load balancer configuration
+Feature Expansion Planning
+Multi-language support architecture
+Audio verse integration
+Social features (sharing progress)
+Advanced analytics dashboard
+Risk Assessment & Mitigation
+Technical Risks (7/10 overall)
+High: Spaced repetition algorithm complexity
+Medium: Docker deployment learning curve
+Low: Django/PostgreSQL stability
+Business Risks
+High: User acquisition and retention
+Medium: Content licensing for additional translations
+Low: Infrastructure scaling costs
+Mitigation Strategies
+Start with simple SRS algorithm
+Comprehensive testing for core features
+Progressive enhancement for advanced features
+Regular database backups and monitoring
