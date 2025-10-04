@@ -1,7 +1,7 @@
 {
     "extends": [
         "next/core-web-vitals",
-        "prettier" // Must be last to override conflicting rules
+        "prettier" // Disables formatting rules (keep last)
     ],
     "plugins": ["import"],
     "rules": {
