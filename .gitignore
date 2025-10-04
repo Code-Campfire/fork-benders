@@ -1,5 +1,6 @@
 # IDE
 .vscode/
+!.vscode/settings.json
 .idea/
 *.swp
 *.swo
@@ -11,6 +12,15 @@ Thumbs.db
 # Environment
 .env
 .env.local
+
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+out/
+build/
+dist/
 
 # Docker volumes
 postgres_data/

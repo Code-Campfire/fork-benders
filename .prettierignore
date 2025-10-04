@@ -1,0 +1,31 @@
+# Backend - DO NOT FORMAT
+backend/
+**/*.py
+**/*.pyc
+*.py
+*.pyc
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Frontend build artifacts
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/dist/
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Config files
+*.config.js
+next.config.js
+
+# Other
+.git/
+.vscode/
+.idea/
+coverage/

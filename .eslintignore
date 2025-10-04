@@ -1,0 +1,13 @@
+backend/
+**/*.py
+node_modules/
+.next/
+out/
+build/
+dist/
+.git/
+coverage/
+
+# Config files
+*.config.js
+*.config.ts
