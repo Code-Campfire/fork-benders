@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Python backend (prevent Prettier from touching backend)
+../**/*.py
+../backend/
