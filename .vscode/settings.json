@@ -1,16 +1,42 @@
 {
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[javascriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+
+    // Tell ESLint to only work in frontend
+    "eslint.workingDirectories": ["./frontend"],
+
+    // Disable formatters for Python files
+    "[python]": {
+        "editor.formatOnSave": false,
+        "editor.defaultFormatter": null
+    },
+
+    // JavaScript/TypeScript files use Prettier
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[javascriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+
+    // Exclude backend from file watching
+    "files.watcherExclude": {
+        "**/backend/**": true,
+        "**/node_modules/**": true
+    },
+
+    // Don't search backend in quick open
+    "search.exclude": {
+        "**/backend/**": true,
+        "**/node_modules/**": true
+    }
 }

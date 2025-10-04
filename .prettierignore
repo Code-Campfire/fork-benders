@@ -1,15 +1,31 @@
+# Backend - DO NOT FORMAT
+backend/
+**/*.py
+**/*.pyc
+*.py
+*.pyc
+
 # Dependencies
 node_modules/
-.next/
-out/
-build/
-dist/
+**/node_modules/
 
-# Files
+# Frontend build artifacts
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/dist/
+
+# Lock files
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
-# Python backend (prevent Prettier from touching backend)
-../**/*.py
-../backend/
+# Config files
+*.config.js
+next.config.js
+
+# Other
+.git/
+.vscode/
+.idea/
+coverage/
