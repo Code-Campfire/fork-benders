@@ -60,7 +60,63 @@ The hook will auto-fix this. Imports are organized:
 ## Rules We Follow
 
 - **Prettier**: 4 spaces, semicolons, single quotes
-- **ESLint**: Next.js best practices + accessibility checks
+- **ESLint**: Next.js best practices + accessibility checks + base JavaScript rules
 - **Import ordering**: Alphabetical within groups
+
+## Testing the Linting Setup
+
+Want to verify ESLint and Husky are working? Create these test files in `frontend/app/`:
+
+### Test 1: Auto-Fix Test (Commit Should Succeed)
+
+**File:** `frontend/app/test-autofix.js`
+
+```javascript
+// Imports in WRONG order - should be: builtin → external → internal
+// ESLint --fix will reorder these automatically
+import axios from 'axios';
+import path from 'path';
+
+function fetchData(endpoint) {
+    const fullPath = path.join('/api', endpoint);
+    return axios.get(fullPath);
+}
+
+export default fetchData;
+```
+
+**Test:**
+```bash
+git add frontend/app/test-autofix.js
+git commit -m "Test auto-fix"
+```
+
+**Expected:** Commit succeeds. ESLint auto-fixes the import order.
+
+### Test 2: Error Test (Commit Should Fail)
+
+**File:** `frontend/app/test-commit.js`
+
+```javascript
+const unusedVariable = 'test';
+
+function testFunction() {
+    console.log(undefinedVariable);
+}
+```
+
+**Test:**
+```bash
+git add frontend/app/test-commit.js
+git commit -m "Test linting errors"
+```
+
+**Expected:** Commit fails with 4 errors:
+- `unusedVariable` is assigned but never used
+- `testFunction` is defined but never used
+- Unexpected `console.log` statement
+- `undefinedVariable` is not defined
+
+**Cleanup:** `git restore --staged frontend/app/test-*.js && rm frontend/app/test-*.js`
 
 That's all you need to know! Questions? Ask the team.
