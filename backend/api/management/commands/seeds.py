@@ -4,6 +4,7 @@
 import time
 from django.core.management.base import BaseCommand
 from django.db import transaction
+import requests
 from tqdm import tqdm
 
 # TODO: Replace with real models when teammate's PR merges
@@ -57,6 +58,8 @@ class Command(BaseCommand):
             elapsed_time = time.time() - start_time
             self.display_results(stats, elapsed_time)
 
+        except requests.RequestException as e:
+            self.stdout.write(self.style.ERROR(f'\nError: {str(e)}'))
         except ValueError as e:
             self.stdout.write(self.style.ERROR(f'\nError: {str(e)}'))
         except Exception as e:
