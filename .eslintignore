@@ -8,6 +8,12 @@ dist/
 .git/
 coverage/
 
+# PWA generated files
+frontend/public/sw.js
+frontend/public/workbox-*.js
+frontend/public/sw.js.map
+frontend/public/workbox-*.js.map
+
 # Config files
 *.config.js
 *.config.ts

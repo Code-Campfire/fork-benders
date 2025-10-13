@@ -11,6 +11,15 @@ export const metadata = {
         userScalable: true,
         viewportFit: 'cover', // For iOS safe areas
     },
+    manifest: '/manifest.json',
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: 'default',
+        title: 'Bible Study',
+    },
+    icons: {
+        apple: '/icons/manifest-icon-192.maskable.png',
+    },
 };
 
 export default function RootLayout({ children }) {
