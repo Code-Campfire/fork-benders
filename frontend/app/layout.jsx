@@ -1,6 +1,7 @@
 import './globals.css';
 import '../styles/mobile.css';
 
+import OfflineBanner from '../components/OfflineBanner';
 import { DBProvider } from '../lib/DBProvider';
 
 export const metadata = {
@@ -28,7 +29,12 @@ export default function RootLayout({ children }) {
     return (
         <html lang="en">
             <body>
-                <DBProvider>{children}</DBProvider>
+                <DBProvider>
+                    <OfflineBanner />
+                    <div style={{ paddingTop: 'var(--banner-height, 0)' }}>
+                        {children}
+                    </div>
+                </DBProvider>
             </body>
         </html>
     );
