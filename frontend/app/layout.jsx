@@ -1,6 +1,8 @@
 import './globals.css';
 import '../styles/mobile.css';
 
+import { DBProvider } from '../lib/DBProvider';
+
 export const metadata = {
     title: 'Bible Learning App',
     description: 'Learn and memorize scripture',
@@ -25,7 +27,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
     return (
         <html lang="en">
-            <body>{children}</body>
+            <body>
+                <DBProvider>{children}</DBProvider>
+            </body>
         </html>
     );
 }
