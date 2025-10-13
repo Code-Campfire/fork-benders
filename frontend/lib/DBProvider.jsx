@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
 import * as db from './db';
+import { cleanupSyncService, initSyncService } from './syncService';
 
 const DBContext = createContext({
     isInitialized: false,
@@ -19,6 +20,9 @@ export function DBProvider({ children }) {
             try {
                 await db.initDB();
                 setIsInitialized(true);
+
+                // Initialize sync service after DB is ready
+                initSyncService();
             } catch (err) {
                 console.error('Failed to initialize database:', err);
                 setError(err);
@@ -26,6 +30,11 @@ export function DBProvider({ children }) {
         };
 
         initialize();
+
+        // Cleanup sync service on unmount
+        return () => {
+            cleanupSyncService();
+        };
     }, []);
 
     const value = {
