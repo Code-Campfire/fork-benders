@@ -7,10 +7,7 @@ from django.db import transaction
 import requests
 from tqdm import tqdm
 
-# TODO: Replace with real models when teammate's PR merges
-# Update imports to: Translation, Book, Verse (check field names match ERD)
-# Then update all references throughout this file and run tests
-from api.models import TranslationTest, BookTest, VerseTest
+from api.models import Translation, Book, Verse
 from api.utils.fetch_bible_data import fetch_bible_translation
 from api.utils.transform_bible_import_data import transform_bible_data
 
@@ -101,7 +98,7 @@ class Command(BaseCommand):
 
         # Create or get translation
         translation_data = transformed_data['translation']
-        translation, created = TranslationTest.objects.get_or_create(
+        translation, created = Translation.objects.get_or_create(
             code=translation_data['code'],
             defaults={
                 'name': translation_data['name'],
@@ -123,7 +120,7 @@ class Command(BaseCommand):
                 with transaction.atomic():
                     # Create book
                     book_data = book_entry['book_data']
-                    book, book_created = BookTest.objects.get_or_create(
+                    book, book_created = Book.objects.get_or_create(
                         name=book_data['name'],
                         defaults={
                             'canon_order': book_data['canon_order'],
@@ -138,7 +135,7 @@ class Command(BaseCommand):
                         stats['books_skipped'] += 1
 
                     # Delete existing verses for this translation+book combination
-                    deleted_count = VerseTest.objects.filter(
+                    deleted_count = Verse.objects.filter(
                         translation=translation,
                         book=book
                     ).delete()[0]
@@ -147,7 +144,7 @@ class Command(BaseCommand):
                     # Prepare verse instances
                     verses_data = book_entry['verses']
                     verse_instances = [
-                        VerseTest(
+                        Verse(
                             translation=translation,
                             book=book,
                             chapter=verse['chapter'],
@@ -160,7 +157,7 @@ class Command(BaseCommand):
                     ]
 
                     # Bulk create verses
-                    VerseTest.objects.bulk_create(verse_instances, batch_size=1000)
+                    Verse.objects.bulk_create(verse_instances, batch_size=1000)
                     stats['verses_created'] += len(verse_instances)
 
             except Exception as e:

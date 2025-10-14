@@ -2,9 +2,6 @@
 Integration tests for seeds management command.
 
 Run with: docker compose exec backend python manage.py test api.tests.test_seeds_command
-
-NOTE: These tests use the real test models (TranslationTest, BookTest, VerseTest).
-When real models are merged, update these tests to use the real models.
 """
 
 from django.test import TestCase
@@ -13,7 +10,7 @@ from unittest.mock import patch, Mock
 from io import StringIO
 import requests
 
-from api.models import TranslationTest, BookTest, VerseTest
+from api.models import Translation, Book, Verse
 
 
 class TestSeedsCommand(TestCase):
@@ -68,17 +65,17 @@ class TestSeedsCommand(TestCase):
         call_command('seeds', stdout=out)
 
         # Verify database records
-        self.assertEqual(TranslationTest.objects.count(), 1)
-        translation = TranslationTest.objects.first()
+        self.assertEqual(Translation.objects.count(), 1)
+        translation = Translation.objects.first()
         self.assertEqual(translation.code, 'TEST')
         self.assertEqual(translation.name, 'Test Bible Translation')
 
-        self.assertEqual(BookTest.objects.count(), 2)
-        genesis = BookTest.objects.get(name='Genesis')
+        self.assertEqual(Book.objects.count(), 2)
+        genesis = Book.objects.get(name='Genesis')
         self.assertEqual(genesis.canon_order, 1)
         self.assertEqual(genesis.testament, 'OT')
 
-        self.assertEqual(VerseTest.objects.count(), 3)  # 2 Genesis + 1 Exodus
+        self.assertEqual(Verse.objects.count(), 3)  # 2 Genesis + 1 Exodus
 
         # Verify output
         output = out.getvalue()
@@ -99,7 +96,7 @@ class TestSeedsCommand(TestCase):
 
         # First import
         call_command('seeds', stdout=StringIO())
-        first_verse_count = VerseTest.objects.count()
+        first_verse_count = Verse.objects.count()
         self.assertEqual(first_verse_count, 3)
 
         # Second import (should delete and re-create)
@@ -107,7 +104,7 @@ class TestSeedsCommand(TestCase):
         call_command('seeds', stdout=out)
 
         # Should still have same count, but verses were deleted and recreated
-        self.assertEqual(VerseTest.objects.count(), 3)
+        self.assertEqual(Verse.objects.count(), 3)
 
         output = out.getvalue()
         self.assertIn('Verses deleted (duplicates): 3', output)
@@ -144,7 +141,7 @@ class TestSeedsCommand(TestCase):
 
         # Should not have made any API calls or created records
         mock_get.assert_not_called()
-        self.assertEqual(TranslationTest.objects.count(), 0)
+        self.assertEqual(Translation.objects.count(), 0)
 
     @patch('api.utils.fetch_bible_data.requests.get')
     @patch('builtins.input')
@@ -160,7 +157,7 @@ class TestSeedsCommand(TestCase):
         self.assertIn('error', output.lower())
 
         # Should not have created any records
-        self.assertEqual(TranslationTest.objects.count(), 0)
+        self.assertEqual(Translation.objects.count(), 0)
 
     @patch('api.utils.fetch_bible_data.requests.get')
     @patch('builtins.input')
@@ -209,7 +206,7 @@ class TestSeedsCommand(TestCase):
         call_command('seeds', stdout=StringIO())
 
         # Book should be stored with normalized name
-        book = BookTest.objects.first()
+        book = Book.objects.first()
         self.assertEqual(book.name, '1 Samuel')
         self.assertEqual(book.canon_order, 9)
 
@@ -226,20 +223,18 @@ class TestSeedsCommand(TestCase):
 
         call_command('seeds', stdout=StringIO())
 
-        verse = VerseTest.objects.first()
+        verse = Verse.objects.first()
         self.assertEqual(verse.text_len, len(verse.text))
 
 
 class TestSeedsCommandModelCompatibility(TestCase):
     """
-    Tests to verify compatibility when switching from test models to real models.
-
-    TODO: Update these tests when real models are merged.
+    Tests to verify model compatibility with seeds command requirements.
     """
 
     def test_translation_model_has_required_fields(self):
         """Translation model should have all required fields"""
-        translation = TranslationTest(
+        translation = Translation(
             code='TEST',
             name='Test Translation',
             license='Public Domain',
@@ -254,7 +249,7 @@ class TestSeedsCommandModelCompatibility(TestCase):
 
     def test_book_model_has_required_fields(self):
         """Book model should have all required fields"""
-        book = BookTest(
+        book = Book(
             name='Genesis',
             canon_order=1,
             short_name='Gen',
@@ -269,10 +264,10 @@ class TestSeedsCommandModelCompatibility(TestCase):
 
     def test_verse_model_has_required_fields(self):
         """Verse model should have all required fields"""
-        translation = TranslationTest.objects.create(code='TEST', name='Test')
-        book = BookTest.objects.create(name='Genesis', canon_order=1)
+        translation = Translation.objects.create(code='TEST', name='Test')
+        book = Book.objects.create(name='Genesis', canon_order=1)
 
-        verse = VerseTest(
+        verse = Verse(
             translation=translation,
             book=book,
             chapter=1,
