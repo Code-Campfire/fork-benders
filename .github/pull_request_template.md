@@ -5,6 +5,11 @@
 - [ ] No console errors
 - [ ] Branch up to date with main
 
+# Optional Notices
+
+- [ ] Database migrations
+- [ ] Docker rebuild required
+
 ## Description
 
 Brief summary of changes
@@ -13,6 +18,6 @@ Brief summary of changes
 
 How was this tested?
 
-## Any Commands need to be run for testing OR after merged and new Main created?
+## Commands Required for Testing or After Merge?
 
 Add any terminal commands here for teammates to quickly complete testing or working with new main.
