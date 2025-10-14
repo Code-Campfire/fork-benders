@@ -83,7 +83,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'bible_app',
         'USER': 'postgres',
-        'PASSWORD': 'postgres',
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
         'HOST': os.environ.get('DB_HOST', 'db'),
         'PORT': '5432',
     }
@@ -131,6 +131,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Custom user model
+AUTH_USER_MODEL = 'api.CustomUser'
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
