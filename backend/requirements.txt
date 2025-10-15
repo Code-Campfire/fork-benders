@@ -6,3 +6,8 @@ python-decouple==3.8
 gunicorn==22.0.0
 requests==2.32.3
 tqdm==4.66.5
+djangorestframework-simplejwt
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+djangorestframework-simplejwt

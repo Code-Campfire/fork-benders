@@ -3,6 +3,8 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
+import GoogleLoginButton from '@/components/GoogleLoginButton';
+
 export default function Home() {
     const [connectionStatus, setConnectionStatus] = useState<
         'loading' | 'connected' | 'disconnected'
@@ -38,6 +40,7 @@ export default function Home() {
                 {connectionStatus === 'connected' && 'Connected'}
                 {connectionStatus === 'disconnected' && 'Disconnected'}
             </div>
+            <GoogleLoginButton />
         </div>
     );
 }
