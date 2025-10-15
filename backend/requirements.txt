@@ -4,3 +4,8 @@ django-cors-headers==4.4.0
 psycopg2-binary==2.9.9
 python-decouple==3.8
 gunicorn==22.0.0
+djangorestframework-simplejwt
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+djangorestframework-simplejwt
