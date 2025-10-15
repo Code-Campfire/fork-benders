@@ -12,7 +12,7 @@ Thumbs.db
 # Environment
 .env
 .env.local
-.claude/CLAUDE.md
+.claude
 
 # Dependencies
 node_modules/
