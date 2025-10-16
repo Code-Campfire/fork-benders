@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
+import React from 'react';
 import './globals.css';
+
+/* globals.css - Imports Tailwind CSS throughout your whole app -- add styling within any page without adding imports. */
 
 export const metadata: Metadata = {
     title: 'Bible Learning App',
