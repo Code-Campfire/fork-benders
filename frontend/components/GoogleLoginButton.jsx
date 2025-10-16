@@ -2,9 +2,12 @@
 
 import { useEffect } from 'react';
 
+import { useAuthStore } from '../store/useAuthStore'; // adjust path as needed
+
 export default function GoogleLoginButton() {
+    const setTokens = useAuthStore((state) => state.setTokens);
     useEffect(() => {
-        // Create the Google Identity script
+        // Create the Google Identity script,
         const script = document.createElement('script');
         script.src = 'https://accounts.google.com/gsi/client';
         script.async = true;
@@ -48,8 +51,8 @@ export default function GoogleLoginButton() {
             const data = await res.json();
 
             if (res.ok) {
-                localStorage.setItem('access', data.access);
-                localStorage.setItem('refresh', data.refresh);
+                // ✅ Store tokens in Zustand
+                setTokens(data.access, data.refresh, data.email);
                 alert(`Welcome ${data.email}!`);
             } else {
                 alert('Login failed');
