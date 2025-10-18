@@ -76,7 +76,19 @@ export default function RegisterForm() {
             router.push('/dashboard');
         } catch (error) {
             if (error.response?.data) {
-                setErrors(error.response.data);
+                const errorData = error.response.data;
+                const formattedErrors = {};
+
+                // Handle Django password validation errors which come as arrays
+                Object.keys(errorData).forEach((key) => {
+                    if (Array.isArray(errorData[key])) {
+                        formattedErrors[key] = errorData[key].join(' ');
+                    } else {
+                        formattedErrors[key] = errorData[key];
+                    }
+                });
+
+                setErrors(formattedErrors);
             } else {
                 setErrors({
                     general: 'Registration failed. Please try again.',
@@ -161,6 +173,11 @@ export default function RegisterForm() {
                             </ul>
                         )}
                     </div>
+                )}
+                {errors.password && (
+                    <p className="mt-1 text-sm text-red-600">
+                        {errors.password}
+                    </p>
                 )}
             </div>
 
