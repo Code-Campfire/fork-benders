@@ -4,6 +4,11 @@
         "next/core-web-vitals",
         "prettier" // Disables formatting rules (keep last)
     ],
+    "env": {
+        "browser": true,
+        "es2021": true,
+        "node": true
+    },
     "plugins": ["import"],
     "rules": {
         // === IMPORT ORGANIZATION ===
