@@ -92,9 +92,16 @@ def refresh_token_view(request):
     try:
         refresh = RefreshToken(refresh_token)
         access_token = refresh.access_token
-        
+
+        # Get user object from the token payload
+        user_id = refresh.payload.get('user_id')
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_401_UNAUTHORIZED)
+
         # Rotate refresh token
-        new_refresh = RefreshToken.for_user(refresh.payload.get('user_id'))
+        new_refresh = RefreshToken.for_user(user)
         
         response = Response({
             'access_token': str(access_token)
