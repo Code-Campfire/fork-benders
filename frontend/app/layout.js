@@ -1,16 +1,11 @@
-import type { Metadata } from 'next';
 import './globals.css';
 
-export const metadata: Metadata = {
+export const metadata = {
     title: 'Bible Learning App',
     description: 'Learn and memorize scripture',
 };
 
-export default function RootLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
+export default function RootLayout({ children }) {
     return (
         <html lang="en">
             <body>{children}</body>
