@@ -25,3 +25,12 @@ dist/
 
 # Docker volumes
 postgres_data/
+# Python
+venv/
+env/
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/

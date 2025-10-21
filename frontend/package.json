@@ -16,12 +16,14 @@
         "axios": "^1.7.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
+        "google-one-tap": "^1.0.6",
         "lucide-react": "^0.545.0",
         "next": "14.2.5",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "tailwind-merge": "^3.3.1",
-        "tailwindcss-animate": "^1.0.7"
+        "tailwindcss-animate": "^1.0.7",
+        "zustand": "^5.0.8"
     },
     "devDependencies": {
         "@types/node": "^20",
