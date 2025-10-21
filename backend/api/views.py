@@ -2,15 +2,15 @@ from datetime import timedelta
 from django.conf import settings
 from django.contrib.auth import login
 from django.db import connection
-from rest_framework import status
+from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserSerializer
-from .models import CustomUser
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserSerializer, UserProfileSerializer
+from .models import CustomUser, UserProfile
 
 
 @api_view(['GET'])
@@ -138,3 +138,17 @@ def logout_view(request):
 def user_profile(request):
     serializer = UserSerializer(request.user)
     return Response(serializer.data)
+
+
+class UserProfileDetailView(generics.RetrieveUpdateAPIView):
+    """
+    GET: Retrieve current user's profile
+    PATCH/PUT: Update current user's profile preferences
+    """
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        # Get or create profile for the authenticated user
+        profile, created = UserProfile.objects.get_or_create(user=self.request.user)
+        return profile

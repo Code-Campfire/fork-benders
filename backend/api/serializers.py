@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from .models import CustomUser
+from .models import CustomUser, UserProfile
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -54,3 +54,38 @@ class UserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ('id', 'email', 'is_active', 'created_at', 'last_login')
         read_only_fields = ('id', 'created_at', 'last_login')
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    """Serializer for UserProfile model - handles study preferences."""
+    email = serializers.EmailField(source='user.email', read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            'email',
+            'display_name',
+            'default_translation',
+            'review_goal_per_day',
+            'notif_hour',
+            'accessibility_json',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['email', 'created_at', 'updated_at']
+
+    def validate_review_goal_per_day(self, value):
+        """Validate review_goal_per_day is between 1 and 100."""
+        if value is not None and (value < 1 or value > 100):
+            raise serializers.ValidationError(
+                "Review goal must be between 1 and 100 verses per day."
+            )
+        return value
+
+    def validate_notif_hour(self, value):
+        """Validate notif_hour is between 0 and 23, or null."""
+        if value is not None and (value < 0 or value > 23):
+            raise serializers.ValidationError(
+                "Notification hour must be between 0 and 23, or leave empty."
+            )
+        return value
