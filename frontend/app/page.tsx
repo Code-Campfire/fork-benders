@@ -3,7 +3,7 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-import GoogleLoginButton from '@/components/GoogleLoginButton';
+import GoogleLoginButton from '../components/GoogleLoginButton';
 
 export default function Home() {
     const [connectionStatus, setConnectionStatus] = useState<
