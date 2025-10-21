@@ -1,11 +1,13 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { useAuthStore } from '../store/useAuthStore'; // adjust path as needed
+import { useAuthStore } from '../lib/auth-store';
 
 export default function GoogleLoginButton() {
-    const setTokens = useAuthStore((state) => state.setTokens);
+    const router = useRouter();
+    const { setAuth } = useAuthStore();
     useEffect(() => {
         // Create the Google Identity script,
         const script = document.createElement('script');
@@ -39,24 +41,24 @@ export default function GoogleLoginButton() {
     }, []);
 
     const handleCallbackResponse = async (response) => {
-        const token = response.credential;
-
         try {
-            const res = await fetch('http://localhost:8000/auth/google/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token }),
-            });
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/auth/google/`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ token: response.credential }),
+                }
+            );
 
             const data = await res.json();
 
             if (res.ok) {
-                // ✅ Store tokens in Zustand
-                setTokens(data.access, data.refresh, data.email);
-                alert(`Welcome ${data.email}!`);
+                setAuth({ email: data.email }, data.access_token);
+                router.push('/dashboard');
             } else {
-                alert('Login failed');
-                console.error('Backend error:', data);
+                console.error('Login failed:', data);
             }
         } catch (err) {
             console.error('Error during login:', err);

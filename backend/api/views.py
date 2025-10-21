@@ -68,7 +68,7 @@ class GoogleLoginView(APIView):
 
             # Optionally set refresh token as HttpOnly cookie
             response = Response({
-                'access': access,
+                'access_token': access,
                 'email': user.email
             }, status=status.HTTP_200_OK)
 
