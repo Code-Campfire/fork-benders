@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from .models import CustomUser
+from .models import CustomUser, UserHabit, RecentVerse
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -54,3 +54,29 @@ class UserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ('id', 'email', 'is_active', 'created_at', 'last_login')
         read_only_fields = ('id', 'created_at', 'last_login')
+
+
+class HabitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserHabit
+        fields = ['id', 'habit', 'frequency', 'purpose', 'day', 'time', 'reminder']
+        read_only_fields = ['id']
+
+
+class RecentVerseSerializer(serializers.ModelSerializer):
+    verse_text = serializers.CharField(source='verse.text', read_only=True)
+    verse_reference = serializers.SerializerMethodField()
+    book_name = serializers.CharField(source='book.short_name', read_only=True)
+
+    class Meta:
+        model = RecentVerse
+        fields = ['id', 'verse', 'verse_text', 'verse_reference', 'book_name', 'chapter', 'last_accessed']
+        read_only_fields = ['id', 'last_accessed']
+
+    def get_verse_reference(self, obj):
+        return f"{obj.book.short_name} {obj.chapter}:{obj.verse.verse_num}"
+
+
+class DashboardSerializer(serializers.Serializer):
+    current_habit = HabitSerializer(read_only=True, allow_null=True)
+    recent_verses = RecentVerseSerializer(many=True, read_only=True)
