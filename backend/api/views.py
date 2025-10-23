@@ -2,8 +2,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from django.db import connection
+from django.db import connection, transaction
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -16,8 +17,16 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserSerializer
-from .models import CustomUser
+from django_ratelimit.decorators import ratelimit
+from .serializers import (
+    UserRegistrationSerializer,
+    UserLoginSerializer,
+    UserSerializer,
+    HabitSerializer,
+    RecentVerseSerializer,
+    DashboardSerializer
+)
+from .models import CustomUser, UserHabit, RecentVerse, Verse, Book
 
 
 @api_view(['GET'])
@@ -200,3 +209,120 @@ def logout_view(request):
 def user_profile(request):
     serializer = UserSerializer(request.user)
     return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@ratelimit(key='user', rate='60/m', method='GET')
+def current_habit_view(request):
+    try:
+        habit = UserHabit.objects.filter(user=request.user).first()
+
+        if not habit:
+            return Response(
+                {'current_habit': None},
+                status=status.HTTP_200_OK
+            )
+
+        serializer = HabitSerializer(habit)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response(
+            {'error': 'Server error'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+@ratelimit(key='user', rate='60/m', method='ALL')
+def recent_verses_view(request):
+    if request.method == 'GET':
+        try:
+            recent_verses = RecentVerse.objects.filter(
+                user=request.user
+            ).select_related('verse', 'book').order_by('-last_accessed')[:2]
+
+            serializer = RecentVerseSerializer(recent_verses, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {'error': 'Server error'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    elif request.method == 'POST':
+        try:
+            verse_id = request.data.get('verse_id')
+
+            if not verse_id:
+                return Response(
+                    {'error': 'verse_id is required'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            try:
+                verse = Verse.objects.select_related('book').get(id=verse_id)
+            except Verse.DoesNotExist:
+                return Response(
+                    {'error': 'Verse not found'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            with transaction.atomic():
+                recent_verse, created = RecentVerse.objects.update_or_create(
+                    user=request.user,
+                    book=verse.book,
+                    chapter=verse.chapter,
+                    defaults={
+                        'verse': verse
+                    }
+                )
+
+                if created:
+                    user_recent_count = RecentVerse.objects.filter(user=request.user).count()
+
+                    if user_recent_count > 2:
+                        oldest = RecentVerse.objects.filter(
+                            user=request.user
+                        ).order_by('last_accessed').first()
+
+                        if oldest and oldest.id != recent_verse.id:
+                            oldest.delete()
+
+            serializer = RecentVerseSerializer(recent_verse)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response(
+                {'error': 'Server error'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@ratelimit(key='user', rate='60/m', method='GET')
+def dashboard_view(request):
+    try:
+        habit = UserHabit.objects.filter(user=request.user).first()
+
+        recent_verses = RecentVerse.objects.filter(
+            user=request.user
+        ).select_related('verse', 'book').order_by('-last_accessed')[:2]
+
+        dashboard_data = {
+            'current_habit': habit,
+            'recent_verses': recent_verses
+        }
+
+        serializer = DashboardSerializer(dashboard_data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response(
+            {'error': 'Server error'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

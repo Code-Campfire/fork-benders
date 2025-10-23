@@ -13,3 +13,4 @@ google-auth-oauthlib
 google-auth-httplib2
 requests==2.32.3
 tqdm==4.66.5
+django-ratelimit==4.1.0
