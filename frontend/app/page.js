@@ -5,6 +5,9 @@ import { useEffect, useState } from 'react';
 
 import GoogleLoginButton from '../components/GoogleLoginButton';
 
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+
 export default function Home() {
     const [connectionStatus, setConnectionStatus] = useState('loading');
 
@@ -71,6 +74,18 @@ export default function Home() {
                     </a>
                     <GoogleLoginButton />
                 </div>
+
+                <div className="mt-8">
+                    <Button className="bg-blue-500 text-white p-4 rounded-lg shadow-lg">
+                        Tailwind v3 is working!!!
+                    </Button>
+                </div>
+
+                <Card className="bg-bible-gold h-20 flex items-center p-3 m-3 mt-4">
+                    <p className="text-red-700">
+                        This is a shadcn/ui Card component
+                    </p>
+                </Card>
             </div>
         </div>
     );
