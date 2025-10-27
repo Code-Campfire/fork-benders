@@ -12,7 +12,7 @@ Thumbs.db
 # Environment
 .env
 .env.local
-.claude
+
 
 # Dependencies
 node_modules/
@@ -27,3 +27,13 @@ dist/
 postgres_data/
 
 CLAUDE.md
+
+# Python
+venv/
+env/
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
