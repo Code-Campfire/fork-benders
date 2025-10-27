@@ -12,7 +12,7 @@ Thumbs.db
 # Environment
 .env
 .env.local
-.claude
+
 
 # Dependencies
 node_modules/
@@ -25,3 +25,12 @@ dist/
 
 # Docker volumes
 postgres_data/
+# Python
+venv/
+env/
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/

@@ -329,3 +329,35 @@ class ReviewLog(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.verse} at {self.ts}"
+
+
+class RecentVerse(models.Model):
+    """Tracks recently viewed verses, max 2 per user with different book/chapter."""
+
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='recent_verses'
+    )
+    verse = models.ForeignKey(
+        Verse,
+        on_delete=models.CASCADE,
+        related_name='recent_verse_entries'
+    )
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        help_text="Denormalized for faster queries"
+    )
+    chapter = models.IntegerField(help_text="Denormalized for faster queries")
+    last_accessed = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'recent_verses'
+        unique_together = [['user', 'book', 'chapter']]
+        indexes = [
+            models.Index(fields=['user', 'last_accessed']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.email} - {self.book.short_name} {self.chapter}"
