@@ -190,6 +190,48 @@ class Verse(models.Model):
         return f"{self.book.short_name} {self.chapter}:{self.verse_num}"
 
 
+class StudyNote(models.Model):
+    """User notes on verses for study and reflection."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='study_notes'
+    )
+    verse = models.ForeignKey(
+        Verse,
+        on_delete=models.CASCADE,
+        related_name='study_notes',
+        null=True,
+        blank=True
+    )
+    verse_reference = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Human-readable reference like 'John 3:16'"
+    )
+    content = models.TextField(help_text="The user's note content")
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    synced_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Last time this was synced from client"
+    )
+
+    class Meta:
+        db_table = 'study_notes'
+        ordering = ['-updated_at']
+        indexes = [
+            models.Index(fields=['user', '-updated_at']),
+            models.Index(fields=['verse']),
+        ]
+
+    def __str__(self):
+        return f"Note by {self.user.email} on {self.verse_reference or 'general'}"
+
+
 class Deck(models.Model):
     """Collection of verses for study."""
 

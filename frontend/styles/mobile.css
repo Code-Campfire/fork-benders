@@ -1,0 +1,352 @@
+/* ================================================
+   MOBILE-FIRST STYLES
+   Touch targets, safe areas, and mobile optimizations
+   ================================================ */
+
+/* ================================================
+   iOS Safe Area Support
+   ================================================ */
+:root {
+    /* Define safe area insets for iOS notch/home indicator */
+    --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --safe-area-inset-right: env(safe-area-inset-right, 0px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-inset-left: env(safe-area-inset-left, 0px);
+
+    /* Mobile-specific spacing */
+    --mobile-padding: 16px;
+    --mobile-padding-small: 8px;
+    --mobile-padding-large: 24px;
+
+    /* Touch target minimum size (WCAG 2.1 Level AAA: 44x44px) */
+    --touch-target-min: 44px;
+    --touch-target-comfortable: 48px;
+}
+
+/* ================================================
+   Safe Area Application
+   Apply to fixed/sticky elements that touch edges
+   ================================================ */
+.safe-area-top {
+    padding-top: var(--safe-area-inset-top);
+}
+
+.safe-area-right {
+    padding-right: var(--safe-area-inset-right);
+}
+
+.safe-area-bottom {
+    padding-bottom: var(--safe-area-inset-bottom);
+}
+
+.safe-area-left {
+    padding-left: var(--safe-area-inset-left);
+}
+
+.safe-area-all {
+    padding-top: var(--safe-area-inset-top);
+    padding-right: var(--safe-area-inset-right);
+    padding-bottom: var(--safe-area-inset-bottom);
+    padding-left: var(--safe-area-inset-left);
+}
+
+.safe-area-horizontal {
+    padding-right: var(--safe-area-inset-right);
+    padding-left: var(--safe-area-inset-left);
+}
+
+.safe-area-vertical {
+    padding-top: var(--safe-area-inset-top);
+    padding-bottom: var(--safe-area-inset-bottom);
+}
+
+/* ================================================
+   Touch Target Sizes
+   Ensure interactive elements are easily tappable
+   ================================================ */
+.touch-target {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.touch-target-comfortable {
+    min-height: var(--touch-target-comfortable);
+    min-width: var(--touch-target-comfortable);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Apply to common interactive elements */
+button,
+a.button,
+input[type='button'],
+input[type='submit'],
+input[type='reset'],
+.btn {
+    min-height: var(--touch-target-min);
+    padding: 12px 20px;
+    touch-action: manipulation; /* Disable double-tap zoom */
+}
+
+/* Input fields */
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='tel'],
+input[type='url'],
+input[type='search'],
+input[type='number'],
+input[type='date'],
+textarea,
+select {
+    min-height: var(--touch-target-min);
+    padding: 12px;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+}
+
+/* Checkbox and radio with larger tap area */
+input[type='checkbox'],
+input[type='radio'] {
+    min-width: 24px;
+    min-height: 24px;
+    margin: 10px; /* Adds spacing for easier tapping */
+}
+
+/* ================================================
+   Mobile Typography
+   Optimized for readability on small screens
+   ================================================ */
+@media (max-width: 767px) {
+    body {
+        font-size: 16px; /* Base size to prevent iOS zoom */
+        line-height: 1.5;
+    }
+
+    h1 {
+        font-size: 1.75rem; /* 28px */
+        line-height: 1.2;
+        margin-bottom: 1rem;
+    }
+
+    h2 {
+        font-size: 1.5rem; /* 24px */
+        line-height: 1.3;
+        margin-bottom: 0.875rem;
+    }
+
+    h3 {
+        font-size: 1.25rem; /* 20px */
+        line-height: 1.4;
+        margin-bottom: 0.75rem;
+    }
+
+    h4 {
+        font-size: 1.125rem; /* 18px */
+        line-height: 1.4;
+        margin-bottom: 0.625rem;
+    }
+
+    p {
+        margin-bottom: 1rem;
+    }
+}
+
+/* ================================================
+   Mobile Spacing
+   Comfortable padding and margins for mobile
+   ================================================ */
+@media (max-width: 767px) {
+    .container {
+        padding-left: var(--mobile-padding);
+        padding-right: var(--mobile-padding);
+    }
+
+    .section-padding {
+        padding: var(--mobile-padding-large) var(--mobile-padding);
+    }
+
+    /* Reduce spacing between elements on mobile */
+    .stack-mobile > * + * {
+        margin-top: 1rem;
+    }
+
+    .stack-mobile-tight > * + * {
+        margin-top: 0.5rem;
+    }
+}
+
+/* ================================================
+   Touch-Friendly Interactive Elements
+   ================================================ */
+
+/* Add spacing between stacked buttons */
+.button-group-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+@media (max-width: 767px) {
+    .button-group-mobile button {
+        width: 100%;
+    }
+}
+
+/* Link spacing for easier tapping */
+a {
+    padding: 4px 0;
+    display: inline-block;
+}
+
+/* Card/list item touch targets */
+.card,
+.list-item {
+    padding: var(--mobile-padding);
+    min-height: var(--touch-target-min);
+}
+
+/* ================================================
+   Mobile Navigation Patterns
+   ================================================ */
+.mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-bottom: var(--safe-area-inset-bottom);
+    background: white;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.mobile-nav-item {
+    min-height: var(--touch-target-comfortable);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ================================================
+   Scrolling & Overscroll
+   ================================================ */
+
+/* Smooth momentum scrolling on iOS */
+.scroll-container {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+}
+
+/* Prevent overscroll/bounce on body (optional) */
+body {
+    overscroll-behavior-y: contain;
+}
+
+/* ================================================
+   Touch Feedback
+   ================================================ */
+
+/* Subtle tap highlight for better feedback */
+button,
+a,
+.interactive {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    transition: opacity 0.2s ease;
+}
+
+button:active,
+a:active,
+.interactive:active {
+    opacity: 0.7;
+}
+
+/* Remove tap highlight for non-interactive elements */
+.no-tap-highlight {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ================================================
+   Mobile-Specific Utilities
+   ================================================ */
+
+/* Show only on mobile */
+.mobile-only {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .mobile-only {
+        display: block;
+    }
+}
+
+/* Hide on mobile */
+@media (max-width: 767px) {
+    .mobile-hidden {
+        display: none !important;
+    }
+}
+
+/* Full width on mobile */
+@media (max-width: 767px) {
+    .mobile-full-width {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
+/* ================================================
+   Landscape Mode Adjustments
+   ================================================ */
+@media (max-width: 767px) and (orientation: landscape) {
+    :root {
+        --mobile-padding: 12px;
+        --mobile-padding-large: 16px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    h2 {
+        font-size: 1.25rem;
+    }
+}
+
+/* ================================================
+   High DPI / Retina Displays
+   ================================================ */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    /* Thinner borders look better on retina */
+    .border {
+        border-width: 0.5px;
+    }
+}
+
+/* ================================================
+   Accessibility: Reduced Motion
+   ================================================ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ================================================
+   Dark Mode Support (if needed)
+   ================================================ */
+@media (prefers-color-scheme: dark) {
+    .mobile-nav {
+        background: #1a1a1a;
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
+    }
+}

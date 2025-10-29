@@ -3,10 +3,10 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-import GoogleLoginButton from '../components/GoogleLoginButton';
-
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+
+import GoogleLoginButton from '../components/GoogleLoginButton';
 
 export default function Home() {
     const [connectionStatus, setConnectionStatus] = useState('loading');
@@ -23,8 +23,9 @@ export default function Home() {
         const checkConnection = async () => {
             try {
                 const baseUrl =
-                    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                const response = await axios.get(`${baseUrl}/api/health/`);
+                    process.env.NEXT_PUBLIC_API_URL ||
+                    'http://localhost:8000/api';
+                const response = await axios.get(`${baseUrl}/health/`);
                 if (response.data.database_connected) {
                     setConnectionStatus('connected');
                 } else {

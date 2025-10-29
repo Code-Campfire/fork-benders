@@ -31,3 +31,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# PWA generated files (auto-generated during build)
+/public/sw.js
+/public/sw.js.map
+/public/workbox-*.js
+/public/workbox-*.js.map
+ 
+ MOBILE_UTILS_README.md
+ OFFLINE_FIRST_COMPLETE.md
+ lib/API_CLIENT_README.md
+ 
