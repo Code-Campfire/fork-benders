@@ -12,12 +12,13 @@
         "lint:fix": "next lint --fix"
     },
     "dependencies": {
-        "@radix-ui/react-slot": "^1.2.3",
         "@ducanh2912/next-pwa": "^10.2.9",
+        "@radix-ui/react-slot": "^1.2.3",
         "axios": "^1.7.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "google-one-tap": "^1.0.6",
+        "idb": "^8.0.3",
         "lucide-react": "^0.545.0",
         "next": "14.2.5",
         "react": "^18.3.1",

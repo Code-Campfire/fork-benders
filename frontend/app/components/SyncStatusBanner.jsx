@@ -5,11 +5,16 @@ import { useDB } from '../../lib/DBProvider';
 export default function SyncStatusBanner() {
     const { syncStatus, triggerSync } = useDB();
 
+    // Don't render until syncStatus is available
     if (!syncStatus) {
         return null;
     }
 
-    const { pendingCount, isOnline, isSyncing } = syncStatus;
+    const {
+        pendingCount = 0,
+        isOnline = true,
+        isSyncing = false,
+    } = syncStatus || {};
 
     // Don't show banner if nothing pending and online
     if (pendingCount === 0 && isOnline) {

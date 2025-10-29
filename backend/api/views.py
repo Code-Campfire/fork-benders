@@ -24,9 +24,10 @@ from .serializers import (
     UserSerializer,
     HabitSerializer,
     RecentVerseSerializer,
-    DashboardSerializer
+    DashboardSerializer,
+    StudyNoteSerializer
 )
-from .models import CustomUser, UserHabit, RecentVerse, Verse, Book
+from .models import CustomUser, UserHabit, RecentVerse, Verse, Book, StudyNote
 
 
 @api_view(['GET'])
@@ -326,3 +327,24 @@ def dashboard_view(request):
             {'error': 'Server error'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@api_view(['POST', 'GET'])
+@permission_classes([IsAuthenticated])
+def study_notes(request):
+    """
+    Handle study notes creation and retrieval.
+    POST: Create a new study note (for offline sync)
+    GET: List all study notes for the user
+    """
+    if request.method == 'POST':
+        serializer = StudyNoteSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'GET':
+        notes = StudyNote.objects.filter(user=request.user).order_by('-updated_at')
+        serializer = StudyNoteSerializer(notes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

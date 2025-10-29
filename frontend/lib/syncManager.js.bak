@@ -195,6 +195,11 @@ const syncQueueItem = async (item) => {
         // Get access token from auth store
         const accessToken = useAuthStore.getState().accessToken;
 
+        console.log('🔐 Sync - Access token present:', !!accessToken);
+        if (accessToken) {
+            console.log('🔐 Sync - Token length:', accessToken.length);
+        }
+
         const fetchOptions = {
             method: item.method,
             headers: {
@@ -206,20 +211,17 @@ const syncQueueItem = async (item) => {
         // Add Authorization header if token exists
         if (accessToken) {
             fetchOptions.headers.Authorization = `Bearer ${accessToken}`;
+            console.log('✓ Sync - Authorization header added');
+        } else {
+            console.warn('⚠️ Sync - No access token available, request will be unauthorized');
         }
 
         // Only add body for non-GET/HEAD requests
-        if (
-            item.method &&
-            !['GET', 'HEAD'].includes(item.method.toUpperCase())
-        ) {
+        if (item.method && !['GET', 'HEAD'].includes(item.method.toUpperCase())) {
             fetchOptions.body = JSON.stringify(requestData);
         }
 
-        const response = await fetch(
-            `${API_BASE_URL}${item.endpoint}`,
-            fetchOptions
-        );
+        const response = await fetch(`${API_BASE_URL}${item.endpoint}`, fetchOptions);
 
         clearTimeout(timeoutId);
 

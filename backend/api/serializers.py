@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from .models import CustomUser, UserHabit, RecentVerse
+from .models import CustomUser, UserHabit, RecentVerse, StudyNote
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -80,3 +80,17 @@ class RecentVerseSerializer(serializers.ModelSerializer):
 class DashboardSerializer(serializers.Serializer):
     current_habit = HabitSerializer(read_only=True, allow_null=True)
     recent_verses = RecentVerseSerializer(many=True, read_only=True)
+
+
+class StudyNoteSerializer(serializers.ModelSerializer):
+    """Serializer for study notes with offline sync support."""
+
+    class Meta:
+        model = StudyNote
+        fields = ['id', 'verse', 'verse_reference', 'content', 'created_at', 'updated_at', 'synced_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        # Auto-assign the logged-in user
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
