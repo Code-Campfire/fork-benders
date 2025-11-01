@@ -350,14 +350,16 @@ def study_notes(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+@ratelimit(key='user', rate='60/m', method='ALL')
 def habits(request):
     if request.method == 'GET':
-        habits = Habit.objects.all()
+        habits = UserHabit.objects.filter(user=request.user)
         serializer = HabitSerializer(habits, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
         serializer = HabitSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=request.user) 
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
