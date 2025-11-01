@@ -85,7 +85,6 @@ import { Toggle } from '@/components/ui/toggle';
 
 import GoogleLoginButton from '../components/GoogleLoginButton';
 import HabitReminderModal from '../components/ui/HabitReminderModal';
-import { ToggleWithText } from '../components/ui/SaveVerseBtn';
 
 export default function Home() {
     const [connectionStatus, setConnectionStatus] = useState('loading');
@@ -345,9 +344,13 @@ export default function Home() {
                     <NavigationMenuList>
                         <NavigationMenuItem>
                             <NavigationMenuTrigger>Home</NavigationMenuTrigger>
+                        </NavigationMenuItem>
+                        <NavigationMenuItem>
                             <NavigationMenuTrigger>
                                 Saved Verses
                             </NavigationMenuTrigger>
+                        </NavigationMenuItem>
+                        <NavigationMenuItem>
                             <NavigationMenuTrigger>
                                 Account
                             </NavigationMenuTrigger>
@@ -423,7 +426,6 @@ export default function Home() {
                     <p>It&apos;s subtle but it highlights it. Look closer!</p>
                 </div>
                 <Toggle>Toggle</Toggle>
-                <ToggleWithText />
                 <div className="mt-10 mb-10">
                     ------------------------ ------------------------
                 </div>

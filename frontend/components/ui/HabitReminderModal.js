@@ -245,7 +245,7 @@ export default function HabitReminderModal({ isOpen, onClose }) {
     // Rendering on the modal
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent>
+            <DialogContent aria-describedby={undefined}>
                 <DialogHeader>
                     <DialogTitle>Step {currentStep} of 10</DialogTitle>
                 </DialogHeader>
@@ -267,12 +267,11 @@ export default function HabitReminderModal({ isOpen, onClose }) {
                             Go back
                         </Button>
                     )}
-                    <Button onClick={handleNext} className="mt-2">
-                        {currentStep === 10 ? (
-                            <Button onClick={handleSubmit}> Complete </Button>
-                        ) : (
-                            'Next'
-                        )}
+                    <Button
+                        onClick={currentStep === 10 ? handleSubmit : handleNext}
+                        className="mt-2"
+                    >
+                        {currentStep === 10 ? 'Complete' : 'Next'}
                     </Button>
                 </DialogFooter>
             </DialogContent>
