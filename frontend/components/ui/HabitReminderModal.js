@@ -60,13 +60,29 @@ export default function HabitReminderModal({ isOpen, onClose }) {
         setCurrentStep((prevState) => Math.max(1, prevState - 1));
     };
 
-    // Stepper feature for each stage of the process
+    // Stepper description for each stage of the process
 
     const getStepDescription = (currentStep) => {
         // return description based on step
         switch (currentStep) {
             case 1:
-                return <Label>Let&apos;s get your first habit set up</Label>;
+                return (
+                    <>
+                        <div className="mt-10 mb-5">
+                            <div> insert logo </div>
+                        </div>
+                        <div className="mt-5 mb-5  text-black">
+                            <div className="text-lg font-semibold">
+                                Let&apos;s get your first habit set up
+                            </div>
+                            <br />
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur
+                                adipiscing elit, sed do eiusmod tempor.
+                            </div>
+                        </div>
+                    </>
+                );
             case 2:
                 return (
                     <>
@@ -75,7 +91,7 @@ export default function HabitReminderModal({ isOpen, onClose }) {
                         </div>
                         <div className="mt-5 mb-5  text-black">
                             <div className="text-lg font-semibold">
-                                Define yor habit
+                                Define your habit
                             </div>
                             <br />
                             <div>
@@ -180,28 +196,23 @@ export default function HabitReminderModal({ isOpen, onClose }) {
         }
     };
 
-    // Functionality on user input
+    // Stepper Functionality/Content on user input
     function renderStepContent(currentStep) {
         switch (currentStep) {
             case 1:
-                return (
-                    <div>
-                        <div>Insert an image</div>
-                        <div>Insert an description</div>
-                    </div>
-                );
+                return null;
             case 2:
-                return <div>Example</div>;
+                return null;
             case 3:
-                return <div>Example</div>;
+                return null;
             case 4:
-                return <div>Example</div>;
+                return null;
             case 5:
-                return <div>Example</div>;
+                return null;
             case 6:
-                return <div>Example</div>;
+                return null;
             case 7:
-                return <div>Example</div>;
+                return null;
             case 8:
                 return (
                     <Select
@@ -236,13 +247,13 @@ export default function HabitReminderModal({ isOpen, onClose }) {
                     </div>
                 );
             case 10:
-                return <div>Example</div>;
+                return null;
             default:
                 return null;
         }
     }
 
-    // Rendering on the modal
+    // Rendering the modal
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent aria-describedby={undefined}>
