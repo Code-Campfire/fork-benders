@@ -4,6 +4,12 @@
         "next/core-web-vitals",
         "prettier" // Disables formatting rules (keep last)
     ],
+    "ignorePatterns": [
+        "public/sw.js",
+        "public/workbox-*.js",
+        "public/swe-worker-*.js",
+        "public/*.js.map"
+    ],
     "env": {
         "browser": true,
         "es2021": true,
