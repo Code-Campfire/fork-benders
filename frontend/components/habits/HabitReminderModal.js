@@ -21,17 +21,17 @@ export default function HabitReminderModal({ isOpen, onClose }) {
     const [error, setError] = useState(null);
     // Temporary HabitData, when modal UI is complete set to blank
     const [habitData, setHabitData] = useState({
-        habit: '',
-        frequency: '',
-        purpose: '',
-        day: '',
-        time: '',
-        location: '',
-        reminder: '',
+        habit: 'null',
+        frequency: 'null',
+        purpose: 'null',
+        day: 'null',
+        time: '00:00:00',
+        location: 'null',
+        reminder: 'null',
         skipped: false,
     });
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (isSkipped = false) => {
         setIsSubmitting(true);
         setError(null);
 
@@ -39,6 +39,7 @@ export default function HabitReminderModal({ isOpen, onClose }) {
             // Format the time properly for the backend
             const payload = {
                 ...habitData,
+                skipped: isSkipped,
                 reminder: parseInt(habitData.reminder) || 0,
             };
             const createdHabit = await habitAPI.create(payload);
@@ -54,6 +55,7 @@ export default function HabitReminderModal({ isOpen, onClose }) {
                 day: '',
                 time: '',
                 reminder: '',
+                skipped: false,
             });
         } catch (err) {
             console.error('Error creating habit:', err);
@@ -78,7 +80,7 @@ export default function HabitReminderModal({ isOpen, onClose }) {
     };
 
     const handleSkip = () => {
-        onClose();
+        handleSubmit(true);
     };
 
     const goBack = () => {
@@ -114,7 +116,11 @@ export default function HabitReminderModal({ isOpen, onClose }) {
                         </Button>
                     )}
                     <Button
-                        onClick={currentStep === 10 ? handleSubmit : handleNext}
+                        onClick={
+                            currentStep === 10
+                                ? () => handleSubmit()
+                                : handleNext
+                        }
                         disabled={isSubmitting}
                         className="mt-2"
                     >

@@ -28,6 +28,11 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
+        // If no config, can't retry - just reject
+        if (!originalRequest) {
+            return Promise.reject(error);
+        }
+
         // Don't retry if:
         // 1. Already retried
         // 2. The request is to the refresh endpoint itself (prevent infinite loop)
