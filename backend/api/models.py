@@ -120,7 +120,7 @@ class UserHabit(models.Model):
     purpose = models.CharField(max_length=255)
     day = models.CharField(max_length=255)
     time = models.DateTimeField()
-    location = models.CharField(max_length=255, default='home')
+    location = models.CharField(max_length=255, default='null')
     reminder = models.IntegerField()
     skipped = models.BooleanField(default=False)
 
