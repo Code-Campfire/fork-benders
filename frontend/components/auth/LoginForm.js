@@ -1,5 +1,6 @@
 'use client';
 
+import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -14,6 +15,9 @@ export default function LoginForm() {
     });
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const [emailNotVerified, setEmailNotVerified] = useState(false);
+    const [resendSuccess, setResendSuccess] = useState(false);
+    const [resendLoading, setResendLoading] = useState(false);
 
     const router = useRouter();
     const { setAuth, setLoading } = useAuthStore();
@@ -44,11 +48,27 @@ export default function LoginForm() {
             router.push('/dashboard');
         } catch (error) {
             if (error.response?.data) {
-                if (typeof error.response.data === 'object') {
-                    setErrors(error.response.data);
+                const errorData = error.response.data;
+
+                // Check if it's an email verification error
+                if (errorData.non_field_errors) {
+                    const errorMessage = Array.isArray(
+                        errorData.non_field_errors
+                    )
+                        ? errorData.non_field_errors[0]
+                        : errorData.non_field_errors;
+
+                    if (errorMessage.includes('Email address not verified')) {
+                        setEmailNotVerified(true);
+                        setErrors({ general: errorMessage });
+                    } else {
+                        setErrors({ general: errorMessage });
+                    }
+                } else if (typeof errorData === 'object') {
+                    setErrors(errorData);
                 } else {
                     setErrors({
-                        general: error.response.data.detail || 'Login failed',
+                        general: errorData.detail || 'Login failed',
                     });
                 }
             } else {
@@ -60,6 +80,33 @@ export default function LoginForm() {
         }
     };
 
+    const handleResendVerification = async () => {
+        setResendLoading(true);
+        setResendSuccess(false);
+
+        try {
+            const apiUrl =
+                process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+            await axios.post(`${apiUrl}/auth/resend-verification/`, {
+                email: formData.email,
+            });
+
+            setResendSuccess(true);
+            setErrors({});
+        } catch (error) {
+            if (error.response?.data?.error) {
+                setErrors({ general: error.response.data.error });
+            } else {
+                setErrors({
+                    general:
+                        'Failed to send verification email. Please try again.',
+                });
+            }
+        } finally {
+            setResendLoading(false);
+        }
+    };
+
     return (
         <form
             onSubmit={handleSubmit}
@@ -67,7 +114,37 @@ export default function LoginForm() {
         >
             <h2 className="text-2xl font-bold mb-6 text-center">Sign In</h2>
 
-            {errors.general && (
+            {resendSuccess && (
+                <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+                    <p className="font-medium">Verification email sent!</p>
+                    <p className="text-sm mt-1">
+                        Please check your inbox and spam folder for the
+                        verification link.
+                    </p>
+                </div>
+            )}
+
+            {errors.general && emailNotVerified && (
+                <div className="mb-4 p-4 bg-yellow-100 border border-yellow-400 text-yellow-800 rounded">
+                    <p className="font-medium mb-2">{errors.general}</p>
+                    <p className="text-sm mb-3">
+                        Please check your email for the verification link. If
+                        you didn&apos;t receive it, you can request a new one.
+                    </p>
+                    <button
+                        type="button"
+                        onClick={handleResendVerification}
+                        disabled={resendLoading}
+                        className="w-full bg-yellow-600 text-white py-2 px-4 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 disabled:opacity-50"
+                    >
+                        {resendLoading
+                            ? 'Sending...'
+                            : 'Resend Verification Email'}
+                    </button>
+                </div>
+            )}
+
+            {errors.general && !emailNotVerified && (
                 <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
                     {errors.general}
                 </div>

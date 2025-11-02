@@ -37,6 +37,8 @@ next-env.d.ts
 /public/sw.js.map
 /public/workbox-*.js
 /public/workbox-*.js.map
+/public/swe-worker-*.js
+/public/swe-worker-*.js.map
  
  MOBILE_UTILS_README.md
  OFFLINE_FIRST_COMPLETE.md
