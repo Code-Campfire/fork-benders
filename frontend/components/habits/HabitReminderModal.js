@@ -19,6 +19,7 @@ export default function HabitReminderModal({ isOpen, onClose }) {
     //prevents double-submits
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
+    // Temporary HabitData, when modal UI is complete set to blank
     const [habitData, setHabitData] = useState({
         habit: 'Hi',
         frequency: '2',
@@ -76,13 +77,6 @@ export default function HabitReminderModal({ isOpen, onClose }) {
     };
 
     const handleSkip = () => {
-        // need to update models and add "skipped" bool in user_habit
-        // upgrade migrations
-        onClose();
-        // setSkipData(habitData.skipped);
-
-        // API POST call where user skipped === true;
-
         onClose();
     };
 
