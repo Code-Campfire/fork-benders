@@ -83,6 +83,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Toggle } from '@/components/ui/toggle';
 
+import QuickLogin from '../api/QuickLogin';
 import GoogleLoginButton from '../components/GoogleLoginButton';
 import HabitReminderModal from '../components/habits/HabitReminderModal';
 
@@ -162,6 +163,10 @@ export default function Home() {
                         This is a shadcn/ui Card component
                     </p>
                 </Card>
+                <div className="mt-10 mb-10">
+                    ------------------------ ------------------------
+                </div>
+                <QuickLogin />
                 <div className="mt-10 mb-10">
                     ------------------------ ------------------------
                 </div>

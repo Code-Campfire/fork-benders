@@ -12,23 +12,59 @@ import {
     DialogTitle,
     DialogFooter,
 } from '@/components/ui/dialog';
+import { habitAPI } from '@/lib/api';
 
 export default function HabitReminderModal({ isOpen, onClose }) {
-    // const [userData, setUserData] = useState({});
     const [currentStep, setCurrentStep] = useState(1);
-    // const [skipData, setSkipData] = useState({});
+    //prevents double-submits
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState(null);
     const [habitData, setHabitData] = useState({
-        habit: '',
-        frequency: '',
-        purpose: '',
-        day: '',
-        time: '',
-        reminder: '',
+        habit: 'Hi',
+        frequency: '2',
+        purpose: '3',
+        day: 'Tuesday',
+        time: '2025-11-02T08:00:00.000Z',
+        reminder: '2',
     });
 
-    const handleSubmit = () => {
-        // Grab habitData and send through the API to BE
-        // API logic
+    const handleSubmit = async () => {
+        setIsSubmitting(true);
+        setError(null);
+
+        try {
+            // Format the time properly for the backend
+            const payload = {
+                ...habitData,
+                time: habitData.time || new Date().toISOString(),
+                reminder: parseInt(habitData.reminder) || 8,
+            };
+            const createdHabit = await habitAPI.create(payload);
+            console.log('✅ Habit created:', createdHabit);
+
+            // Close modal and reset on success
+            onClose();
+            setCurrentStep(1);
+            setHabitData({
+                habit: '',
+                frequency: '',
+                purpose: '',
+                day: '',
+                time: '',
+                reminder: '',
+            });
+        } catch (err) {
+            console.error('❌ Error creating habit:', err);
+            // Axios error objects have error.response.data for server errors
+            setError(
+                err.response?.data?.detail ||
+                    err.response?.data?.message ||
+                    'Failed to create habit'
+            );
+            console.log('setError is:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleNext = () => {
@@ -42,8 +78,7 @@ export default function HabitReminderModal({ isOpen, onClose }) {
     const handleSkip = () => {
         // need to update models and add "skipped" bool in user_habit
         // upgrade migrations
-
-        habitData.skipped = true;
+        onClose();
         // setSkipData(habitData.skipped);
 
         // API POST call where user skipped === true;
@@ -85,6 +120,7 @@ export default function HabitReminderModal({ isOpen, onClose }) {
                     )}
                     <Button
                         onClick={currentStep === 10 ? handleSubmit : handleNext}
+                        disabled={isSubmitting}
                         className="mt-2"
                     >
                         {currentStep === 10 ? 'Complete' : 'Next'}

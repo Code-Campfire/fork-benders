@@ -72,4 +72,16 @@ export const authAPI = {
     profile: () => api.get('/auth/profile/'),
 };
 
+export const habitAPI = {
+    getAll: () => api.get('/habits/'),
+    getCurrent: () => api.get('/habits/current/'),
+    create: (data) => api.post('/habits/', data),
+    update: (id, data) => api.put(`/habits/${id}/`, data),
+    delete: (id) => api.delete(`/habits/${id}/`),
+};
+
+export const dashboardAPI = {
+    get: () => api.get('/dashboard/'),
+};
+
 export default api;
