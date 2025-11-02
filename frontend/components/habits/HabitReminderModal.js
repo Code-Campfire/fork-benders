@@ -21,12 +21,14 @@ export default function HabitReminderModal({ isOpen, onClose }) {
     const [error, setError] = useState(null);
     // Temporary HabitData, when modal UI is complete set to blank
     const [habitData, setHabitData] = useState({
-        habit: 'Hi',
-        frequency: '2',
-        purpose: '3',
-        day: 'Tuesday',
-        time: '2025-11-02T08:00:00.000Z',
-        reminder: '2',
+        habit: '',
+        frequency: '',
+        purpose: '',
+        day: '',
+        time: '',
+        location: '',
+        reminder: '',
+        skipped: false,
     });
 
     const handleSubmit = async () => {
@@ -37,11 +39,10 @@ export default function HabitReminderModal({ isOpen, onClose }) {
             // Format the time properly for the backend
             const payload = {
                 ...habitData,
-                time: habitData.time || new Date().toISOString(),
-                reminder: parseInt(habitData.reminder) || 8,
+                reminder: parseInt(habitData.reminder) || 0,
             };
             const createdHabit = await habitAPI.create(payload);
-            console.log('✅ Habit created:', createdHabit);
+            console.log('Habit created:', createdHabit);
 
             // Close modal and reset on success
             onClose();
@@ -55,7 +56,7 @@ export default function HabitReminderModal({ isOpen, onClose }) {
                 reminder: '',
             });
         } catch (err) {
-            console.error('❌ Error creating habit:', err);
+            console.error('Error creating habit:', err);
             // Axios error objects have error.response.data for server errors
             setError(
                 err.response?.data?.detail ||
@@ -96,7 +97,7 @@ export default function HabitReminderModal({ isOpen, onClose }) {
                     - DialogDescription under the hood is <p> tag; which results in Hydration error.
                 */}
                 <div className="text-sm text-muted-foreground">
-                    {getStepDescription(currentStep)}
+                    {getStepDescription(currentStep, habitData, setHabitData)}
                 </div>
                 {renderStepContent(currentStep, habitData, setHabitData)}
                 <DialogFooter>

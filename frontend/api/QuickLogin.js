@@ -4,12 +4,14 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useAuthStore } from '@/lib/auth-store';
 
 export default function QuickLogin() {
     const [email, setEmail] = useState('jovanni.feliz@example.com');
     const [password, setPassword] = useState('112233');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
+    const { setAuth, clearAuth } = useAuthStore();
 
     const handleLogin = async () => {
         setLoading(true);
@@ -31,10 +33,10 @@ export default function QuickLogin() {
 
             const data = await response.json();
 
-            // Save token to localStorage (this is what axios reads!)
-            localStorage.setItem('access_token', data.access_token);
+            // Update Zustand store (this is what axios interceptor reads!)
+            setAuth(data.user, data.access_token);
 
-            setMessage('✅ Logged in! Token saved to localStorage.');
+            setMessage('✅ Logged in! Token saved to Zustand store.');
             console.log(
                 '✅ Token saved:',
                 data.access_token.substring(0, 20) + '...'
@@ -47,16 +49,18 @@ export default function QuickLogin() {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('access_token');
-        setMessage('🗑️ Token cleared');
+        clearAuth();
+        setMessage('🗑️ Token cleared from Zustand store');
     };
 
     const checkToken = () => {
-        const token = localStorage.getItem('access_token');
-        if (token) {
-            setMessage('✅ Token exists: ' + token.substring(0, 30) + '...');
+        const { accessToken } = useAuthStore.getState();
+        if (accessToken) {
+            setMessage(
+                '✅ Token exists: ' + accessToken.substring(0, 30) + '...'
+            );
         } else {
-            setMessage('❌ No token found in localStorage');
+            setMessage('❌ No token found in Zustand store');
         }
     };
 

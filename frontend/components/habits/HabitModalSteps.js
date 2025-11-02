@@ -1,3 +1,9 @@
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -11,9 +17,11 @@ import {
 /**
  * Get the description/content for each step of the habit setup process
  * @param {number} currentStep - The current step number (1-10)
+ * @param {Object} habitData - The habit data state object (optional)
+ * @param {Function} setHabitData - Function to update habit data state (optional)
  * @returns {JSX.Element} The description content for the step
  */
-export function getStepDescription(currentStep) {
+export function getStepDescription(currentStep, habitData, setHabitData) {
     switch (currentStep) {
         case 1:
             return (
@@ -119,13 +127,84 @@ export function getStepDescription(currentStep) {
             );
         case 5:
             return (
-                <div>
-                    <Input
-                        defaultValue="Johnny"
-                        className="inline-block w-auto min-w-16 border-0 border-b-2 border-red-500 rounded-none px-1 py-0 h-auto bg-transparent focus:ring-0"
-                    />
-                    had a green apple
-                </div>
+                <>
+                    <div className="mt-10 mb-10">
+                        <div>
+                            I will{' '}
+                            <Input
+                                value={habitData?.habit || ''}
+                                onChange={(e) =>
+                                    setHabitData({
+                                        ...habitData,
+                                        habit: e.target.value,
+                                    })
+                                }
+                                placeholder="habit"
+                                className="inline-block w-0.5 min-w-16 border-0 border-b-2 border-red-500 rounded-none px-1 py-0 h-auto bg-transparent focus:ring-0"
+                            />
+                            ,{' '}
+                            <Input
+                                type="time"
+                                value={habitData?.time || ''}
+                                onChange={(e) =>
+                                    setHabitData({
+                                        ...habitData,
+                                        time: e.target.value,
+                                    })
+                                }
+                                className="inline-block w-auto min-w-32 border-0 border-b-2 border-red-500 rounded-none px-1 py-0 h-auto bg-transparent focus:ring-0"
+                            />
+                            ,
+                            <Input
+                                value={habitData?.location || ''}
+                                onChange={(e) =>
+                                    setHabitData({
+                                        ...habitData,
+                                        location: e.target.value,
+                                    })
+                                }
+                                placeholder="time/location"
+                                className="inline-block w-auto min-w-16 border-0 border-b-2 border-red-500 rounded-none px-1 py-0 h-auto bg-transparent focus:ring-0"
+                            />
+                            {console.log('Purpose is:', habitData?.location)},
+                        </div>
+                        <div>
+                            so that I can become{' '}
+                            <Input
+                                value={habitData?.purpose || ''}
+                                onChange={(e) =>
+                                    setHabitData({
+                                        ...habitData,
+                                        purpose: e.target.value,
+                                    })
+                                }
+                                placeholder="type of person I want to be"
+                                className="inline-block w-auto min-w-16 border-0 border-b-2 border-red-500 rounded-none px-1 py-0 h-auto bg-transparent focus:ring-0"
+                            />
+                            {console.log('Purpose is:', habitData?.purpose)}
+                        </div>
+                        {console.log('Entire state is:', habitData)}
+                        <div className="mt-5">
+                            <h3>*Please select PM or AM.</h3>
+                        </div>
+                    </div>
+                    {/*  Implementation:
+  // When submitting or displaying the full sentence in user profile:
+  const fullHabitStatement = `I will ${habitData.habit}, 
+  ${habitData.timeLocation}, so that I can become ${habitData.purpose}`; 
+  */}
+                    <Card className=" text-black p-10 bg-slate-200 rounded-xl mt-7 mb-7 h-1 flex items-center">
+                        <CardHeader>
+                            <CardTitle>
+                                Secret to forming effective habits:
+                            </CardTitle>
+                            <CardDescription>
+                                Habits are formed by repeating the same action
+                                over and over again.
+                            </CardDescription>
+                        </CardHeader>
+                    </Card>
+                </>
             );
         case 6:
             return <Label>Reminder time?</Label>;
@@ -193,12 +272,13 @@ export function renderStepContent(currentStep, habitData, setHabitData) {
                 <div>
                     <Input
                         type="time"
-                        onChange={(e) =>
+                        value={habitData?.time || ''}
+                        onChange={(e) => {
                             setHabitData({
                                 ...habitData,
                                 time: e.target.value,
-                            })
-                        }
+                            });
+                        }}
                     />
                 </div>
             );
