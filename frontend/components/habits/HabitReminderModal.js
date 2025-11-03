@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 
-import {
-    getStepDescription,
-    renderStepContent,
-} from '@/components/habits/HabitModalSteps';
+import { getStepDescription } from '@/components/habits/HabitModalSteps';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -15,17 +12,17 @@ import {
 import { habitAPI } from '@/lib/api';
 
 export default function HabitReminderModal({ isOpen, onClose }) {
-    const [currentStep, setCurrentStep] = useState(6);
+    const [currentStep, setCurrentStep] = useState(1);
     //prevents double-submits v
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
     const [habitData, setHabitData] = useState({
-        habit: 'null',
+        habit: 'habit',
         frequency: 'null',
-        purpose: 'null',
+        purpose: 'type of person',
         day: 'null',
         time: '00:00:00',
-        location: 'null',
+        location: 'location',
         reminder: 'null',
         skipped: false,
     });
@@ -91,7 +88,7 @@ export default function HabitReminderModal({ isOpen, onClose }) {
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent aria-describedby={undefined}>
                 <DialogHeader>
-                    <DialogTitle>Step {currentStep} of 10</DialogTitle>
+                    <DialogTitle>Step {currentStep} of 7</DialogTitle>
                 </DialogHeader>
                 {/* Do not wrap the div below in DialogDescription. It will create a Hydration Error
                     - The getStepDescription switch case has <div> tags.
@@ -100,7 +97,6 @@ export default function HabitReminderModal({ isOpen, onClose }) {
                 <div className="text-sm text-muted-foreground">
                     {getStepDescription(currentStep, habitData, setHabitData)}
                 </div>
-                {renderStepContent(currentStep, habitData, setHabitData)}
                 <DialogFooter>
                     <Button
                         variant="outline"
@@ -123,7 +119,7 @@ export default function HabitReminderModal({ isOpen, onClose }) {
                         disabled={isSubmitting}
                         className="mt-2"
                     >
-                        {currentStep === 10 ? 'Complete' : 'Next'}
+                        {currentStep === 7 ? 'Complete' : 'Next'}
                         {}
                     </Button>
                 </DialogFooter>

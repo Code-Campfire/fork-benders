@@ -6,15 +6,9 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 
-import ToggleButton from './ReminderToggleButton';
+import FrequencyToggleButton from './FrequencyToggleButton';
+import ReminderToggleButton from './ReminderToggleButton';
 
 /**
  * Get the description/content for each step of the habit setup process
@@ -146,14 +140,13 @@ export function getStepDescription(currentStep, habitData, setHabitData) {
                             />
                             , at{' '}
                             <Input
+                                type="time"
                                 value={habitData?.time || ''}
-                                onChange={
-                                    (e) =>
-                                        setHabitData({
-                                            ...habitData,
-                                            time: e.target.value,
-                                        })
-                                    // Add this to a separate useState as just string.
+                                onChange={(e) =>
+                                    setHabitData({
+                                        ...habitData,
+                                        time: e.target.value,
+                                    })
                                 }
                                 className="inline-block w-1 min-w-32 border-0 border-b-2 border-red-500 rounded-none px-1 py-0 h-auto bg-transparent focus:ring-0"
                             />
@@ -220,7 +213,7 @@ export function getStepDescription(currentStep, habitData, setHabitData) {
                         <div className="text-lg font-semibold">Repeat</div>
                         <br />
                         <div>
-                            <ToggleButton
+                            <FrequencyToggleButton
                                 habitData={habitData}
                                 setHabitData={setHabitData}
                             />
@@ -242,86 +235,22 @@ export function getStepDescription(currentStep, habitData, setHabitData) {
                         <div className="text-lg font-semibold mt-5">
                             Send Reminder
                         </div>
+                        <div>
+                            <ReminderToggleButton
+                                habitData={habitData}
+                                setHabitData={setHabitData}
+                            />
+                        </div>
                     </div>
                 </>
             );
         case 7:
-            return <Label>Reminder time?</Label>;
-        case 8:
-            return <Label>Reminder time?</Label>;
-        case 9:
-            return <Label>Reminder time?</Label>;
-        case 10:
-            return <Label>Reminder time?</Label>;
+            return <Label>Congratulations!</Label>;
         default:
             return (
                 <Label>
                     Please advise. Missing step and description correlation
                 </Label>
             );
-    }
-}
-
-/**
- * Render the interactive content/form fields for each step
- * @param {number} currentStep - The current step number (1-10)
- * @param {Object} habitData - The habit data state object
- * @param {Function} setHabitData - Function to update habit data state
- * @returns {JSX.Element|null} The interactive content for the step
- */
-export function renderStepContent(currentStep, habitData, setHabitData) {
-    switch (currentStep) {
-        case 1:
-            return null;
-        case 2:
-            return null;
-        case 3:
-            return null;
-        case 4:
-            return null;
-        case 5:
-            return null;
-        case 6:
-            return null;
-        case 7:
-            return null;
-        case 8:
-            return (
-                <Select
-                    onValueChange={(value) =>
-                        setHabitData({
-                            ...habitData,
-                            frequency: value,
-                        })
-                    }
-                >
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select frequency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                    </SelectContent>
-                </Select>
-            );
-        case 9:
-            return (
-                <div>
-                    <Input
-                        type="time"
-                        value={habitData?.time || ''}
-                        onChange={(e) => {
-                            setHabitData({
-                                ...habitData,
-                                time: e.target.value,
-                            });
-                        }}
-                    />
-                </div>
-            );
-        case 10:
-            return null;
-        default:
-            return null;
     }
 }

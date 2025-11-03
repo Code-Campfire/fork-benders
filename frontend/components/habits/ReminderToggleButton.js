@@ -1,67 +1,65 @@
 import { useState, useEffect } from 'react';
 
-import { Toggle } from '@/components/ui/toggle';
+import { Input } from '@/components/ui/input';
 
-export default function ToggleButton({ habitData, setHabitData }) {
-    const [frequencyPick, setFrequencyPick] = useState(
-        habitData?.frequency || null
-    );
+export default function ReminderToggleButton({ habitData, setHabitData }) {
+    // Handle initial value - convert string 'null', null, or undefined to empty string for display
+    const getInitialValue = () => {
+        const reminder = habitData?.reminder;
+        if (
+            reminder === null ||
+            reminder === undefined ||
+            reminder === 'null' ||
+            reminder === ''
+        ) {
+            return '';
+        }
+        return reminder.toString();
+    };
+    console.log(habitData);
+    const [reminderPick, setReminderPick] = useState(getInitialValue());
 
     // Update local state when habitData changes from parent
     useEffect(() => {
-        setFrequencyPick(habitData?.frequency || null);
-    }, [habitData?.frequency]);
-
-    const handleToggle = (value) => {
-        // If clicking the same toggle, deselect it
-        if (frequencyPick === value) {
-            setFrequencyPick(null);
-            setHabitData({
-                ...habitData,
-                frequency: null,
-            });
+        const reminder = habitData?.reminder;
+        if (
+            reminder === null ||
+            reminder === undefined ||
+            reminder === 'null' ||
+            reminder === ''
+        ) {
+            setReminderPick('');
         } else {
-            // Select the new toggle
-            setFrequencyPick(value);
+            setReminderPick(reminder.toString());
+        }
+    }, [habitData?.reminder]);
+
+    const handleInputChange = (e) => {
+        const value = e.target.value;
+        // Allow empty string or valid integer
+        if (value === '' || /^\d+$/.test(value)) {
+            setReminderPick(value);
+            // Convert to integer (hours) for habitData.reminder (null if empty)
+            const hoursValue = value === '' ? null : parseInt(value, 10);
             setHabitData({
                 ...habitData,
-                frequency: value,
+                reminder: hoursValue,
             });
         }
     };
 
     return (
-        <div className="flex justify-around">
-            <Toggle
-                aria-label="Toggle every 12 hours"
-                size="sm"
-                variant="outline"
-                pressed={frequencyPick === 'every_12_hours'}
-                onPressedChange={() => handleToggle('every_12_hours')}
-                className="bg-white text-black border border-input *:[svg]:fill-black *:[svg]:stroke-black data-[state=on]:bg-black data-[state=on]:text-white data-[state=on]:*:[svg]:fill-white data-[state=on]:*:[svg]:stroke-white w-auto"
-            >
-                Every 12 hours
-            </Toggle>
-            <Toggle
-                aria-label="Toggle daily"
-                size="sm"
-                variant="outline"
-                pressed={frequencyPick === 'daily'}
-                onPressedChange={() => handleToggle('daily')}
-                className="bg-white text-black border border-input *:[svg]:fill-black *:[svg]:stroke-black data-[state=on]:bg-black data-[state=on]:text-white data-[state=on]:*:[svg]:fill-white data-[state=on]:*:[svg]:stroke-white w-20"
-            >
-                Daily
-            </Toggle>
-            <Toggle
-                aria-label="Toggle weekly"
-                size="sm"
-                variant="outline"
-                pressed={frequencyPick === 'weekly'}
-                onPressedChange={() => handleToggle('weekly')}
-                className="bg-white text-black border border-input *:[svg]:fill-black *:[svg]:stroke-black data-[state=on]:bg-black data-[state=on]:text-white data-[state=on]:*:[svg]:fill-white data-[state=on]:*:[svg]:stroke-white w-20"
-            >
-                Weekly
-            </Toggle>
+        <div className="flex justify-around w-60">
+            How many hours?
+            <Input
+                type="number"
+                value={reminderPick}
+                onChange={handleInputChange}
+                placeholder="Enter hours"
+                min="0"
+                step="1"
+                className="w-full max-w-xs w-16"
+            />
         </div>
     );
 }
