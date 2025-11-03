@@ -142,17 +142,18 @@ export function getStepDescription(currentStep, habitData, setHabitData) {
                                 placeholder="habit"
                                 className="inline-block w-0.5 min-w-16 border-0 border-b-2 border-red-500 rounded-none px-1 py-0 h-auto bg-transparent focus:ring-0"
                             />
-                            ,{' '}
+                            , at{' '}
                             <Input
-                                type="time"
                                 value={habitData?.time || ''}
-                                onChange={(e) =>
-                                    setHabitData({
-                                        ...habitData,
-                                        time: e.target.value,
-                                    })
+                                onChange={
+                                    (e) =>
+                                        setHabitData({
+                                            ...habitData,
+                                            time: e.target.value,
+                                        })
+                                    // Add this to a separate useState as just string.
                                 }
-                                className="inline-block w-auto min-w-32 border-0 border-b-2 border-red-500 rounded-none px-1 py-0 h-auto bg-transparent focus:ring-0"
+                                className="inline-block w-1 min-w-32 border-0 border-b-2 border-red-500 rounded-none px-1 py-0 h-auto bg-transparent focus:ring-0"
                             />
                             ,
                             <Input
@@ -163,7 +164,7 @@ export function getStepDescription(currentStep, habitData, setHabitData) {
                                         location: e.target.value,
                                     })
                                 }
-                                placeholder="time/location"
+                                placeholder="location"
                                 className="inline-block w-auto min-w-16 border-0 border-b-2 border-red-500 rounded-none px-1 py-0 h-auto bg-transparent focus:ring-0"
                             />
                             {console.log('Purpose is:', habitData?.location)},
@@ -185,7 +186,7 @@ export function getStepDescription(currentStep, habitData, setHabitData) {
                         </div>
                         {console.log('Entire state is:', habitData)}
                         <div className="mt-5">
-                            <h3>*Please select PM or AM.</h3>
+                            <p>*Please select PM or AM.</p>
                         </div>
                     </div>
                     {/*  Implementation:
@@ -193,21 +194,53 @@ export function getStepDescription(currentStep, habitData, setHabitData) {
   const fullHabitStatement = `I will ${habitData.habit}, 
   ${habitData.timeLocation}, so that I can become ${habitData.purpose}`; 
   */}
-                    <Card className=" text-black p-10 bg-slate-200 rounded-xl mt-7 mb-7 h-1 flex items-center">
+                    <Card className=" text-black p-10 bg-slate-200 rounded-xl mt-7 mb-7 h-auto flex items-center">
                         <CardHeader>
                             <CardTitle>
                                 Secret to forming effective habits:
                             </CardTitle>
                             <CardDescription>
-                                Habits are formed by repeating the same action
-                                over and over again.
+                                <li>Action</li>
+                                <li>Time and place</li>
+                                <li>Identity (Most important)</li>
                             </CardDescription>
                         </CardHeader>
                     </Card>
                 </>
             );
         case 6:
-            return <Label>Reminder time?</Label>;
+            return (
+                <>
+                    <div className="mt-10 mb-5">
+                        <div>{`I will ${habitData.habit} at ${habitData.time} at ${habitData.location} so I can become ${habitData.purpose}`}</div>
+                    </div>
+                    <div className="mt-5 mb-5  text-black">
+                        <div className="text-lg font-semibold">Repeat</div>
+                        <br />
+                        <div>
+                            The most effective form of motivation is when a
+                            habit becomes part of who you are.
+                        </div>
+                        <div className="text-lg font-semibold mt-5">
+                            Habit time
+                        </div>
+                        <Input
+                            type="time"
+                            value={habitData?.time || ''}
+                            onChange={(e) =>
+                                setHabitData({
+                                    ...habitData,
+                                    time: e.target.value,
+                                })
+                            }
+                            className="inline-block w-1 min-w-32 border-0 border-b-2 border-red-500 rounded-none px-1 py-0 h-auto bg-transparent focus:ring-0"
+                        />
+                        <div className="text-lg font-semibold mt-5">
+                            Send Reminder
+                        </div>
+                    </div>
+                </>
+            );
         case 7:
             return <Label>Reminder time?</Label>;
         case 8:
