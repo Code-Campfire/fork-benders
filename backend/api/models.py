@@ -118,10 +118,8 @@ class UserHabit(models.Model):
     habit = models.CharField(max_length=255)
     frequency = models.CharField(max_length=255)
     purpose = models.CharField(max_length=255)
-    day = models.CharField(max_length=255)
     time = models.TimeField(verbose_name='Reminder Time')
     location = models.CharField(max_length=255, default='null')
-    reminder = models.IntegerField()
     skipped = models.BooleanField(default=False)
 
     class Meta:

@@ -20,10 +20,8 @@ export default function HabitReminderModal({ isOpen, onClose }) {
         habit: 'habit',
         frequency: 'null',
         purpose: 'type of person',
-        day: 'null',
         time: '00:00:00',
         location: 'location',
-        reminder: 'null',
         skipped: false,
     });
 
@@ -48,9 +46,7 @@ export default function HabitReminderModal({ isOpen, onClose }) {
                 habit: '',
                 frequency: '',
                 purpose: '',
-                day: '',
                 time: '',
-                reminder: '',
                 skipped: false,
             });
         } catch (err) {
@@ -68,7 +64,7 @@ export default function HabitReminderModal({ isOpen, onClose }) {
     };
 
     const handleNext = () => {
-        if (currentStep < 10) {
+        if (currentStep < 7) {
             setCurrentStep((prevState) => prevState + 1);
         } else {
             handleSubmit();
@@ -112,7 +108,7 @@ export default function HabitReminderModal({ isOpen, onClose }) {
                     )}
                     <Button
                         onClick={
-                            currentStep === 10
+                            currentStep === 7
                                 ? () => handleSubmit()
                                 : handleNext
                         }

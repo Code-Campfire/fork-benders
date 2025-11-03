@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 import FrequencyToggleButton from './FrequencyToggleButton';
-import ReminderToggleButton from './ReminderToggleButton';
 
 /**
  * Get the description/content for each step of the habit setup process
@@ -232,15 +231,6 @@ export function getStepDescription(currentStep, habitData, setHabitData) {
                             }
                             className="inline-block w-1 min-w-32 border-0 border-b-2 border-red-500 rounded-none px-1 py-0 h-auto bg-transparent focus:ring-0"
                         />
-                        <div className="text-lg font-semibold mt-5">
-                            Send Reminder
-                        </div>
-                        <div>
-                            <ReminderToggleButton
-                                habitData={habitData}
-                                setHabitData={setHabitData}
-                            />
-                        </div>
                     </div>
                 </>
             );
