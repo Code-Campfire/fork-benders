@@ -15,11 +15,10 @@ import {
 import { habitAPI } from '@/lib/api';
 
 export default function HabitReminderModal({ isOpen, onClose }) {
-    const [currentStep, setCurrentStep] = useState(1);
-    //prevents double-submits
+    const [currentStep, setCurrentStep] = useState(6);
+    //prevents double-submits v
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
-    // Temporary HabitData, when modal UI is complete set to blank
     const [habitData, setHabitData] = useState({
         habit: 'null',
         frequency: 'null',
@@ -125,6 +124,7 @@ export default function HabitReminderModal({ isOpen, onClose }) {
                         className="mt-2"
                     >
                         {currentStep === 10 ? 'Complete' : 'Next'}
+                        {}
                     </Button>
                 </DialogFooter>
             </DialogContent>

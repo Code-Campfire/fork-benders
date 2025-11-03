@@ -14,6 +14,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 
+import ToggleButton from './ReminderToggleButton';
+
 /**
  * Get the description/content for each step of the habit setup process
  * @param {number} currentStep - The current step number (1-10)
@@ -218,8 +220,10 @@ export function getStepDescription(currentStep, habitData, setHabitData) {
                         <div className="text-lg font-semibold">Repeat</div>
                         <br />
                         <div>
-                            The most effective form of motivation is when a
-                            habit becomes part of who you are.
+                            <ToggleButton
+                                habitData={habitData}
+                                setHabitData={setHabitData}
+                            />
                         </div>
                         <div className="text-lg font-semibold mt-5">
                             Habit time
