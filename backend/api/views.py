@@ -1,10 +1,12 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework import status
 from django.db import connection, transaction
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.contrib.auth.password_validation import validate_password
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -25,9 +27,10 @@ from .serializers import (
     HabitSerializer,
     RecentVerseSerializer,
     DashboardSerializer,
-    StudyNoteSerializer
+    StudyNoteSerializer,
+    UserProfileSerializer
 )
-from .models import CustomUser, UserHabit, RecentVerse, Verse, Book, StudyNote
+from .models import CustomUser, UserHabit, RecentVerse, Verse, Book, StudyNote, UserProfile
 
 
 @api_view(['GET'])
@@ -348,3 +351,107 @@ def study_notes(request):
         notes = StudyNote.objects.filter(user=request.user).order_by('-updated_at')
         serializer = StudyNoteSerializer(notes, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserProfileDetailView(RetrieveUpdateAPIView):
+    """
+    GET: Retrieve user profile (auto-creates if doesn't exist)
+    PATCH: Update user profile fields
+    """
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        """Auto-create profile using get_or_create."""
+        profile, created = UserProfile.objects.get_or_create(user=self.request.user)
+        return profile
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@ratelimit(key='user', rate='5/h', method='POST')
+def change_password(request):
+    """Change user password with validation."""
+    user = request.user
+    old_password = request.data.get('old_password')
+    new_password = request.data.get('new_password')
+
+    if not old_password or not new_password:
+        return Response(
+            {'error': 'Both old_password and new_password are required'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Verify old password
+    if not user.check_password(old_password):
+        return Response(
+            {'error': 'Current password is incorrect'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Validate new password
+    try:
+        validate_password(new_password, user)
+    except ValidationError as e:
+        return Response(
+            {'error': list(e.messages)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Set new password
+    user.set_password(new_password)
+    user.save()
+
+    return Response(
+        {'message': 'Password changed successfully'},
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@ratelimit(key='user', rate='10/h', method='POST')
+def upload_avatar(request):
+    """Upload user avatar image."""
+    avatar_file = request.FILES.get('avatar')
+
+    if not avatar_file:
+        return Response(
+            {'error': 'No file provided'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Validate file type
+    allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    if avatar_file.content_type not in allowed_types:
+        return Response(
+            {'error': 'Invalid file type. Allowed: JPEG, PNG, GIF, WEBP'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Validate file size (max 5MB)
+    max_size = 5 * 1024 * 1024  # 5MB
+    if avatar_file.size > max_size:
+        return Response(
+            {'error': 'File too large. Maximum size is 5MB'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Delete old avatar if exists
+    if request.user.avatar:
+        request.user.avatar.delete(save=False)
+
+    # Save new avatar
+    request.user.avatar = avatar_file
+    request.user.save()
+
+    # Return full URL
+    avatar_url = request.build_absolute_uri(request.user.avatar.url)
+
+    return Response(
+        {
+            'message': 'Avatar uploaded successfully',
+            'avatar_url': avatar_url
+        },
+        status=status.HTTP_200_OK
+    )
