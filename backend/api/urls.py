@@ -13,4 +13,9 @@ urlpatterns = [
     path('habits/', views.habits, name='habits'),
     path('recent-verses/', views.recent_verses_view, name='recent-verses'),
     path('study-notes/', views.study_notes, name='study-notes'),
+
+    # Profile management
+    path('profile/', views.UserProfileDetailView.as_view(), name='profile-detail'),
+    path('profile/change-password/', views.change_password, name='change-password'),
+    path('profile/avatar/', views.upload_avatar, name='upload-avatar'),
 ]

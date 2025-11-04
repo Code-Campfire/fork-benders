@@ -26,6 +26,9 @@ dist/
 # Docker volumes
 postgres_data/
 
+# Implementation plans (local reference only)
+PROFILE_IMPLEMENTATION_PLAN.md
+
 CLAUDE.md
 
 # Python
