@@ -1,10 +1,9 @@
 'use client';
 
 import { useAuthStore } from './auth-store';
+import { apiURL } from './config';
 import * as db from './db';
 
-const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 const REQUEST_TIMEOUT = 5000;
 
 let isInitialized = false;
@@ -216,10 +215,7 @@ const syncQueueItem = async (item) => {
             fetchOptions.body = JSON.stringify(requestData);
         }
 
-        const response = await fetch(
-            `${API_BASE_URL}${item.endpoint}`,
-            fetchOptions
-        );
+        const response = await fetch(`${apiURL}${item.endpoint}`, fetchOptions);
 
         clearTimeout(timeoutId);
 
