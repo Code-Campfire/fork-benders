@@ -37,6 +37,10 @@ export default function HabitReminderModal({ isOpen, onClose }) {
                 reminder: parseInt(habitData.reminder) || 0,
             };
             const createdHabit = await habitAPI.create(payload);
+            /*
+ STEP 4: You create a habit in the modal ^ 
+NEXT Go to API Interceptor: frontend/lib/api.js:13-32
+*/
             console.log('Habit created:', createdHabit);
 
             // Close modal and reset on success

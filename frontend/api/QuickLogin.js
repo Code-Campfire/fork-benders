@@ -16,7 +16,11 @@ export default function QuickLogin() {
     const handleLogin = async () => {
         setLoading(true);
         setMessage('');
-
+        /* 
+STEP 1: When you click the "Login & Save Token" button in DOM:
+- Line 24-31 Sends email + password to backend
+- NEXT Go to Backend Handler: backend/api/views.py:114-148 (login_view)
+ */
         try {
             const response = await fetch(
                 'http://localhost:8000/api/auth/login/',

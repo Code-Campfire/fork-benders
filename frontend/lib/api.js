@@ -9,7 +9,11 @@ const api = axios.create({
     baseURL: API_BASE_URL,
     withCredentials: true,
 });
-
+/*
+STEP 5: Before the request is sent, an Axios interceptor automatically:
+  1. Reads the accessToken from Zustand store
+  2. Adds it to the request header: Authorization: Bearer <token>
+*/
 api.interceptors.request.use(
     (config) => {
         const { accessToken } = useAuthStore.getState();
@@ -22,7 +26,12 @@ api.interceptors.request.use(
         return Promise.reject(error);
     }
 );
+/*
+^^ Backend Validates Token & Links to User:
+NEXT Go to Endpoint: backend/api/views.py:356-366 (habits function)
+*/
 
+// Step 8: Token Refresh (Automatic) - response interceptor BELOW
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
@@ -67,7 +76,7 @@ api.interceptors.response.use(
         return Promise.reject(error);
     }
 );
-
+// ^^ NEXT Go to Backend Handler: backend/api/views.py:153-188 (refresh_token_view)
 export const authAPI = {
     register: (data) => api.post('/auth/register/', data),
     login: (data) => api.post('/auth/login/', data),

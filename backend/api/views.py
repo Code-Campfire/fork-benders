@@ -107,7 +107,8 @@ def register(request):
         }, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+# STEP 2: Backend Handler: backend/api/views.py:114-148 (login_view) for Auth
+# Read until Line 149 below
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):
@@ -145,11 +146,11 @@ def login_view(request):
         
         return response
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+# NEXT Go to Frontend Storage: frontend/lib/auth-store.js:17-28
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def refresh_token_view(request):
+def refresh_token_view(request): # Step 9 (Last) - Refresh tokens:
     refresh_token = request.COOKIES.get('refresh_token')
     if not refresh_token:
         return Response({'error': 'Refresh token not found'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -185,7 +186,7 @@ def refresh_token_view(request):
         return response
     except TokenError:
         return Response({'error': 'Invalid refresh token'}, status=status.HTTP_401_UNAUTHORIZED)
-
+# THE END
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -350,9 +351,9 @@ def study_notes(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated]) # ← Requires valid JWT token
 @ratelimit(key='user', rate='60/m', method='ALL')
-def habits(request):
+def habits(request): #STEP 6: Read Line 364
     if request.method == 'GET':
         habits = UserHabit.objects.filter(user=request.user)
         serializer = HabitSerializer(habits, many=True)
@@ -360,6 +361,7 @@ def habits(request):
     elif request.method == 'POST':
         serializer = HabitSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user) 
+            serializer.save(user=request.user) # ← Links habit to authenticated user
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
+#  NEXT Go to Database Model: backend/api/models.py:109-129
