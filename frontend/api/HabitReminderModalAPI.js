@@ -1,11 +1,9 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
-    ? `${process.env.NEXT_PUBLIC_API_URL}/api`
-    : 'http://localhost:8000/api';
+import { apiURL } from '@/lib/config';
 
 // POST
 const createHabit = (payload) =>
     new Promise((resolve, reject) => {
-        fetch(`${API_BASE_URL}/habits/`, {
+        fetch(`${apiURL}/habits/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

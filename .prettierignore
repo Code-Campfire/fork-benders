@@ -14,6 +14,7 @@ frontend/.next/
 frontend/out/
 frontend/build/
 frontend/dist/
+frontend/public/swe-worker-development.js
 
 # Lock files
 package-lock.json
