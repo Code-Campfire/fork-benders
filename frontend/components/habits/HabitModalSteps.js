@@ -217,20 +217,6 @@ export function getStepDescription(currentStep, habitData, setHabitData) {
                                 setHabitData={setHabitData}
                             />
                         </div>
-                        <div className="text-lg font-semibold mt-5">
-                            Habit time
-                        </div>
-                        <Input
-                            type="time"
-                            value={habitData?.time || ''}
-                            onChange={(e) =>
-                                setHabitData({
-                                    ...habitData,
-                                    time: e.target.value,
-                                })
-                            }
-                            className="inline-block w-1 min-w-32 border-0 border-b-2 border-red-500 rounded-none px-1 py-0 h-auto bg-transparent focus:ring-0"
-                        />
                     </div>
                 </>
             );

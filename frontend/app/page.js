@@ -83,13 +83,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Toggle } from '@/components/ui/toggle';
 
-import QuickLogin from '../api/QuickLogin';
 import GoogleLoginButton from '../components/GoogleLoginButton';
-import HabitReminderModal from '../components/habits/HabitReminderModal';
 
 export default function Home() {
     const [connectionStatus, setConnectionStatus] = useState('loading');
-    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const getStatusClasses = () => {
         if (connectionStatus === 'connected')
@@ -163,23 +160,6 @@ export default function Home() {
                         This is a shadcn/ui Card component
                     </p>
                 </Card>
-                <div className="mt-10 mb-10">
-                    ------------------------ ------------------------
-                </div>
-                <QuickLogin />
-                <div className="mt-10 mb-10">
-                    ------------------------ ------------------------
-                </div>
-                <Button
-                    onClick={() => setIsModalOpen(true)}
-                    className="bg-purple-600 text-white p-4 rounded-lg shadow-lg mt-4"
-                >
-                    Open Habit Modal
-                </Button>
-                <HabitReminderModal
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                />
                 <div className="mt-10 mb-10">
                     ------------------------ ------------------------
                 </div>
