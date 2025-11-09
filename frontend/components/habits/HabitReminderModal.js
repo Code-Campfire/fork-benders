@@ -39,6 +39,9 @@ export default function HabitReminderModal({ isOpen, onClose }) {
             };
             const createdHabit = await habitAPI.create(payload);
             console.log('Habit Created:', { createdHabit });
+            isSkipped === false
+                ? alert('Congratulations! Habit has been confirmed')
+                : null;
             handleClose();
         } catch (err) {
             // Axios error objects have error.response.data for server errors
@@ -131,7 +134,6 @@ export default function HabitReminderModal({ isOpen, onClose }) {
                         className="mt-2"
                     >
                         {currentStep === 7 ? 'Complete' : 'Next'}
-                        {isSubmitting ? 'Saving...' : ''}
                     </Button>
                 </DialogFooter>
             </DialogContent>
