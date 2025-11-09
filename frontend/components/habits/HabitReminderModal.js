@@ -26,35 +26,21 @@ export default function HabitReminderModal({ isOpen, onClose }) {
     });
 
     const handleSubmit = async (isSkipped = false) => {
+        // Early return if already submitting (prevents double-submit)
+        if (isSubmitting) return;
+
         setIsSubmitting(true);
         setError(null);
 
         try {
-            // Format the time properly for the backend
             const payload = {
                 ...habitData,
                 skipped: isSkipped,
-                reminder: parseInt(habitData.reminder) || 0,
             };
             const createdHabit = await habitAPI.create(payload);
-            /*
- STEP 4: You create a habit in the modal ^ 
-NEXT Go to API Interceptor: frontend/lib/api.js:13-32
-*/
-            console.log('Habit created:', createdHabit);
-
-            // Close modal and reset on success
-            onClose();
-            setCurrentStep(1);
-            setHabitData({
-                habit: '',
-                frequency: '',
-                purpose: '',
-                time: '',
-                skipped: false,
-            });
+            console.log('Habit Created:', { createdHabit });
+            handleClose();
         } catch (err) {
-            console.error('Error creating habit:', err);
             // Axios error objects have error.response.data for server errors
             setError(
                 err.response?.data?.detail ||
@@ -83,9 +69,29 @@ NEXT Go to API Interceptor: frontend/lib/api.js:13-32
         setCurrentStep((prevState) => Math.max(1, prevState - 1));
     };
 
+    const handleClose = () => {
+        // Prevent closing during submission
+        if (isSubmitting) return;
+
+        // Reset all state to initial values
+        setCurrentStep(1);
+        setError(null);
+        setHabitData({
+            habit: '',
+            frequency: '',
+            purpose: '',
+            time: '',
+            location: '',
+            skipped: false,
+        });
+
+        // Call parent's onClose
+        onClose();
+    };
+
     // Rendering the modal
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog open={isOpen} onOpenChange={handleClose}>
             <DialogContent aria-describedby={undefined}>
                 <DialogHeader>
                     <DialogTitle>Step {currentStep} of 7</DialogTitle>
@@ -101,12 +107,17 @@ NEXT Go to API Interceptor: frontend/lib/api.js:13-32
                     <Button
                         variant="outline"
                         onClick={handleSkip}
+                        disabled={isSubmitting}
                         className="mt-2"
                     >
                         Skip for now
                     </Button>
                     {currentStep > 1 && (
-                        <Button onClick={goBack} className="mt-2">
+                        <Button
+                            onClick={goBack}
+                            disabled={isSubmitting}
+                            className="mt-2"
+                        >
                             Go back
                         </Button>
                     )}
@@ -120,7 +131,7 @@ NEXT Go to API Interceptor: frontend/lib/api.js:13-32
                         className="mt-2"
                     >
                         {currentStep === 7 ? 'Complete' : 'Next'}
-                        {}
+                        {isSubmitting ? 'Saving...' : ''}
                     </Button>
                 </DialogFooter>
             </DialogContent>

@@ -43,17 +43,17 @@ export default function DashboardPage() {
                                 </h2>
                                 <p className="text-gray-600">
                                     Welcome to your Bible study dashboard!
-                                    <Button
-                                        onClick={() => setIsModalOpen(true)}
-                                        className="bg-purple-600 text-white p-4 rounded-lg shadow-lg mt-4"
-                                    >
-                                        Open Habit Modal
-                                    </Button>
-                                    <HabitReminderModal
-                                        isOpen={isModalOpen}
-                                        onClose={() => setIsModalOpen(false)}
-                                    />
                                 </p>
+                                <Button
+                                    onClick={() => setIsModalOpen(true)}
+                                    className="bg-green-500 text-white p-4 rounded-lg shadow-lg mt-4"
+                                >
+                                    Open Habit Modal
+                                </Button>
+                                <HabitReminderModal
+                                    isOpen={isModalOpen}
+                                    onClose={() => setIsModalOpen(false)}
+                                />
                                 <p className="text-sm text-gray-500 mt-2">
                                     More features coming soon...
                                 </p>
