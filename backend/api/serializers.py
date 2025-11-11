@@ -59,7 +59,7 @@ class UserSerializer(serializers.ModelSerializer):
 class HabitSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserHabit
-        fields = ['id', 'habit', 'frequency', 'purpose', 'day', 'time', 'reminder']
+        fields = ['id', 'habit', 'frequency', 'purpose', 'time', 'location', 'skipped']
         read_only_fields = ['id']
 
 

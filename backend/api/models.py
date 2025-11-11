@@ -105,7 +105,7 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"Profile for {self.user.email}"
 
-
+# STEP 7:
 class UserHabit(models.Model):
     """User habits for tracking study patterns."""
 
@@ -113,14 +113,14 @@ class UserHabit(models.Model):
         CustomUser,
         on_delete=models.CASCADE,
         related_name='habits',
-        db_column='user_id'
-    )
+        db_column='user_id' # ← Foreign key column in PostgreSQL
+    ) # NEXT Go toFile: frontend/lib/api.js:35-78 (response interceptor)
     habit = models.CharField(max_length=255)
     frequency = models.CharField(max_length=255)
     purpose = models.CharField(max_length=255)
-    day = models.CharField(max_length=255)
-    time = models.DateTimeField()
-    reminder = models.IntegerField()
+    time = models.TimeField(verbose_name='Reminder Time')
+    location = models.CharField(max_length=255, default='null')
+    skipped = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'user_habit'

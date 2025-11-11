@@ -38,3 +38,10 @@ __pycache__/
 *$py.class
 .Python
 .venv/
+
+# RooCode and RooFlow
+.install_rooflow.sh
+.generate_mcp_yaml.py
+.memory-bank/*
+.roo/*
+.roomodes

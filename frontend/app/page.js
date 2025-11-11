@@ -4,7 +4,6 @@ import axios from 'axios';
 import { AlertCircle, PackageOpen } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-
 import {
     Accordion,
     AccordionContent,
@@ -159,6 +158,9 @@ export default function Home() {
                         This is a shadcn/ui Card component
                     </p>
                 </Card>
+                <div className="mt-10 mb-10">
+                    ------------------------ ------------------------
+                </div>
                 <Accordion type="single" collapsible>
                     <AccordionItem value="item-1">
                         <AccordionTrigger>
