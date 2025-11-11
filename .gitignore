@@ -22,6 +22,7 @@ node_modules/
 out/
 build/
 dist/
+frontend/public/swe-worker-development.js
 
 # Docker volumes
 postgres_data/

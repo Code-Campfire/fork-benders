@@ -14,6 +14,7 @@ frontend/public/swe-worker-development.js
 # PWA generated files
 frontend/public/sw.js
 frontend/public/workbox-*.js
+frontend/public/swe-worker-*.js
 frontend/public/sw.js.map
 frontend/public/workbox-*.js.map
 
