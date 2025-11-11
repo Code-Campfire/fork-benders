@@ -475,3 +475,15 @@ def resend_verification(request):
         'error': 'Failed to send verification email. Please try again.',
         'email_error': email_error
     }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+@api_view(['GET', 'POST'])
+def habits(request):
+    if request.method == 'GET':
+        habits = Habit.objects.all()
+        serializer = HabitSerializer(habits, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = HabitSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)

@@ -12,6 +12,7 @@ urlpatterns = [
     path('auth/resend-verification/', views.resend_verification, name='resend-verification'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('habits/current/', views.current_habit_view, name='current-habit'),
+    path('habits/', views.habits, name='habits'),
     path('recent-verses/', views.recent_verses_view, name='recent-verses'),
     path('study-notes/', views.study_notes, name='study-notes'),
 ]

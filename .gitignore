@@ -16,12 +16,14 @@ Thumbs.db
 
 # Dependencies
 node_modules/
+frontend/package-lock.json
 
 # Build outputs
 .next/
 out/
 build/
 dist/
+frontend/public/swe-worker-development.js
 
 # Docker volumes
 postgres_data/

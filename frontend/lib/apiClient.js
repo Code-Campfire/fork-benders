@@ -1,7 +1,6 @@
+import { apiURL } from './config';
 import * as db from './db';
 
-const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 const REQUEST_TIMEOUT = 5000; // 5 seconds
 
 // ===== HELPER FUNCTIONS =====
@@ -68,9 +67,7 @@ export const getBibleContent = async (endpoint, cacheKey) => {
         // 2. If not found AND online, fetch and cache
         if (isOnline()) {
             console.log(`🌐 Fetching from API: ${endpoint}`);
-            const response = await fetchWithTimeout(
-                `${API_BASE_URL}${endpoint}`
-            );
+            const response = await fetchWithTimeout(`${apiURL}${endpoint}`);
 
             if (!response.ok) {
                 throw new Error(`API error: ${response.status}`);
@@ -116,7 +113,7 @@ export const getVersesByBook = async (book) => {
         if (isOnline()) {
             console.log(`🌐 Fetching from API: /verses/book/${book}`);
             const response = await fetchWithTimeout(
-                `${API_BASE_URL}/verses/book/${book}`
+                `${apiURL}/verses/book/${book}`
             );
 
             if (!response.ok) {
@@ -151,9 +148,7 @@ export const getUserData = async (endpoint, cacheStore, cacheKey) => {
         // 1. If online, attempt API request
         if (isOnline()) {
             console.log(`🌐 Fetching from API: ${endpoint}`);
-            const response = await fetchWithTimeout(
-                `${API_BASE_URL}${endpoint}`
-            );
+            const response = await fetchWithTimeout(`${apiURL}${endpoint}`);
 
             // TODO: Handle 401 with JWT refresh from Step 5
             // if (response.status === 401) { ... }
@@ -240,16 +235,13 @@ export const mutateData = async (endpoint, method, data, options = {}) => {
         // 1. If online, POST to API
         if (isOnline()) {
             console.log(`🌐 ${method} to API: ${endpoint}`);
-            const response = await fetchWithTimeout(
-                `${API_BASE_URL}${endpoint}`,
-                {
-                    method,
-                    body: JSON.stringify(data),
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                }
-            );
+            const response = await fetchWithTimeout(`${apiURL}${endpoint}`, {
+                method,
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
 
             // TODO: Handle 401 with JWT refresh from Step 5
             // if (response.status === 401) { ... }
@@ -392,7 +384,7 @@ export const processSyncQueue = async () => {
     for (const item of queue) {
         try {
             const response = await fetchWithTimeout(
-                `${API_BASE_URL}${item.endpoint}`,
+                `${apiURL}${item.endpoint}`,
                 {
                     method: item.method,
                     body: JSON.stringify(item.data),
