@@ -44,6 +44,9 @@ export default function DashboardPage() {
                                 <p className="text-gray-600">
                                     Welcome to your Bible study dashboard!
                                 </p>
+                                <p className="text-gray-600 mt-2">
+                                    User habit display goes here
+                                </p>
                                 <Button
                                     onClick={() => setIsModalOpen(true)}
                                     className="bg-green-500 text-white p-4 rounded-lg shadow-lg mt-4"

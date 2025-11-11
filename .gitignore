@@ -42,3 +42,6 @@ __pycache__/
 # RooCode and RooFlow
 .install_rooflow.sh
 .generate_mcp_yaml.py
+.memory-bank/*
+.roo/*
+.roomodes
