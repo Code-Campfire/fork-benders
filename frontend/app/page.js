@@ -82,6 +82,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Toggle } from '@/components/ui/toggle';
+import { healthURL } from '@/lib/config';
 
 import GoogleLoginButton from '../components/GoogleLoginButton';
 
@@ -99,10 +100,7 @@ export default function Home() {
     useEffect(() => {
         const checkConnection = async () => {
             try {
-                const baseUrl =
-                    process.env.NEXT_PUBLIC_API_URL ||
-                    'http://localhost:8000/api';
-                const response = await axios.get(`${baseUrl}/health/`);
+                const response = await axios.get(`${healthURL}/`);
                 if (response.data.database_connected) {
                     setConnectionStatus('connected');
                 } else {
