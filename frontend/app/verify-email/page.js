@@ -4,6 +4,8 @@ import axios from 'axios';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { apiURL } from '@/lib/config';
+
 export default function VerifyEmailPage() {
     const [status, setStatus] = useState('verifying'); // verifying, success, error
     const [message, setMessage] = useState('');
@@ -25,11 +27,8 @@ export default function VerifyEmailPage() {
 
         const verifyEmail = async (token, uidb64) => {
             try {
-                const apiUrl =
-                    process.env.NEXT_PUBLIC_API_URL ||
-                    'http://localhost:8000/api';
                 const response = await axios.post(
-                    `${apiUrl}/auth/verify-email/`,
+                    `${apiURL}/auth/verify-email/`,
                     {
                         token,
                         uidb64,
