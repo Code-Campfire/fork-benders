@@ -1,10 +1,16 @@
 'use client';
 
+import { useState } from 'react';
+
+import { Button } from '@/components/ui/button';
+
 import LogoutButton from '../../components/auth/LogoutButton';
 import ProtectedRoute from '../../components/auth/ProtectedRoute';
+import HabitReminderModal from '../../components/habits/HabitReminderModal.js';
 import { useAuthStore } from '../../lib/auth-store';
 
 export default function DashboardPage() {
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const { user } = useAuthStore();
 
     return (
@@ -38,10 +44,24 @@ export default function DashboardPage() {
                                 <p className="text-gray-600">
                                     Welcome to your Bible study dashboard!
                                 </p>
+                                <p className="text-gray-600 mt-2">
+                                    User habit display goes here
+                                </p>
+                                <Button
+                                    onClick={() => setIsModalOpen(true)}
+                                    className="bg-green-500 text-white p-4 rounded-lg shadow-lg mt-4"
+                                >
+                                    Open Habit Modal
+                                </Button>
+                                <HabitReminderModal
+                                    isOpen={isModalOpen}
+                                    onClose={() => setIsModalOpen(false)}
+                                />
                                 <p className="text-sm text-gray-500 mt-2">
                                     More features coming soon...
                                 </p>
                             </div>
+                            <div />
                         </div>
                     </div>
                 </main>
