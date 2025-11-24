@@ -16,6 +16,7 @@ Thumbs.db
 
 # Dependencies
 node_modules/
+frontend/package-lock.json
 
 # Build outputs
 .next/
@@ -38,3 +39,10 @@ __pycache__/
 *$py.class
 .Python
 .venv/
+
+# RooCode and RooFlow
+.install_rooflow.sh
+.generate_mcp_yaml.py
+.memory-bank/*
+.roo/*
+.roomodes

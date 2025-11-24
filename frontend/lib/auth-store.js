@@ -9,16 +9,17 @@ export const useAuthStore = create(
             isAuthenticated: false,
             isLoading: false,
             isInitialized: false,
-
+            // STEP 3: This stores in Zustand (state management):
             setAuth: (user, accessToken) => {
                 set({
                     user,
-                    accessToken,
+                    accessToken, //JWT access token - stored in memory only (not localStorage) for security.
                     isAuthenticated: true,
                     isLoading: false,
                     isInitialized: true,
                 });
             },
+            // NEXT Go to File: frontend/components/habits/HabitReminderModal.js:39
 
             setAccessToken: (token) => {
                 set({ accessToken: token });

@@ -22,7 +22,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user = CustomUser.objects.create_user(
             email=validated_data['email'],
             password=validated_data['password'],
-            is_active=True
+            is_active=True,
+            email_verified=False
         )
         return user
 
@@ -42,10 +43,12 @@ class UserLoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError('Invalid credentials.')
             if not user.is_active:
                 raise serializers.ValidationError('User account is disabled.')
+            if not user.email_verified:
+                raise serializers.ValidationError('Email address not verified. Please check your email for the verification link.')
             attrs['user'] = user
         else:
             raise serializers.ValidationError('Email and password are required.')
-        
+
         return attrs
 
 
@@ -59,7 +62,7 @@ class UserSerializer(serializers.ModelSerializer):
 class HabitSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserHabit
-        fields = ['id', 'habit', 'frequency', 'purpose', 'day', 'time', 'reminder']
+        fields = ['id', 'habit', 'frequency', 'purpose', 'time', 'location', 'skipped']
         read_only_fields = ['id']
 
 

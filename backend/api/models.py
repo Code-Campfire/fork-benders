@@ -20,6 +20,7 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault('email_verified', True)
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
@@ -35,7 +36,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True, max_length=255)
     password = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    email_verified = models.BooleanField(default=False, help_text="Email verification status")
+    last_verification_email_sent = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Timestamp of last verification email sent"
+    )
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     last_login = models.DateTimeField(null=True, blank=True)
@@ -105,7 +112,7 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"Profile for {self.user.email}"
 
-
+# STEP 7:
 class UserHabit(models.Model):
     """User habits for tracking study patterns."""
 
@@ -113,14 +120,14 @@ class UserHabit(models.Model):
         CustomUser,
         on_delete=models.CASCADE,
         related_name='habits',
-        db_column='user_id'
-    )
+        db_column='user_id' # ← Foreign key column in PostgreSQL
+    ) # NEXT Go toFile: frontend/lib/api.js:35-78 (response interceptor)
     habit = models.CharField(max_length=255)
     frequency = models.CharField(max_length=255)
     purpose = models.CharField(max_length=255)
-    day = models.CharField(max_length=255)
-    time = models.DateTimeField()
-    reminder = models.IntegerField()
+    time = models.TimeField(verbose_name='Reminder Time')
+    location = models.CharField(max_length=255, default='null')
+    skipped = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'user_habit'
