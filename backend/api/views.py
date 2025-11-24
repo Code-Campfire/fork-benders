@@ -1,25 +1,30 @@
-from rest_framework.decorators import api_view
+from datetime import timedelta
+
+from django.db import connection, transaction
+from django.conf import settings
+from django.contrib.auth import login
+from django.contrib.auth.tokens import default_token_generator
+from django.utils import timezone
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework import status
-from django.db import connection, transaction
-from django.conf import settings
-from django.core.exceptions import ValidationError
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
+
 from django.contrib.auth.password_validation import validate_password
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
-from rest_framework_simplejwt.tokens import RefreshToken
-from api.models import CustomUser
 
-from datetime import timedelta
-from django.conf import settings
-from django.contrib.auth import login
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework_simplejwt.views import TokenRefreshView
-from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from django_ratelimit.decorators import ratelimit
+
+from api.models import CustomUser
+from api.utils.email import send_verification_email
 from .serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer,
@@ -104,10 +109,29 @@ def register(request):
     serializer = UserRegistrationSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
-        return Response({
-            'message': 'User registered successfully',
-            'user': UserSerializer(user).data
-        }, status=status.HTTP_201_CREATED)
+
+        # Try to send verification email
+        email_success, email_error = send_verification_email(user)
+
+        if email_success:
+            # Update last_verification_email_sent timestamp
+            user.last_verification_email_sent = timezone.now()
+            user.save()
+
+            return Response({
+                'message': 'User registered successfully. Please check your email to verify your account.',
+                'email_sent': True,
+                'user': UserSerializer(user).data
+            }, status=status.HTTP_201_CREATED)
+        else:
+            # Account created but email failed
+            return Response({
+                'message': 'Account created, but verification email failed to send.',
+                'email_sent': False,
+                'email_error': email_error,
+                'user': UserSerializer(user).data
+            }, status=status.HTTP_201_CREATED)
+
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # STEP 2: Backend Handler: backend/api/views.py:114-148 (login_view) for Auth
@@ -353,6 +377,108 @@ def study_notes(request):
         serializer = StudyNoteSerializer(notes, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verify_email(request):
+    """Verify user email address using token and uidb64."""
+    token = request.data.get('token')
+    uidb64 = request.data.get('uidb64')
+
+    if not token or not uidb64:
+        return Response({
+            'error': 'Token and uidb64 are required.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        # Decode the user ID
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = CustomUser.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+        return Response({
+            'error': 'Invalid verification link.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    # Check if the token is valid
+    if not default_token_generator.check_token(user, token):
+        return Response({
+            'error': 'Invalid or expired verification link.',
+            'can_resend': True
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    # Check if email is already verified
+    if user.email_verified:
+        return Response({
+            'message': 'Email address already verified. You can log in now.',
+            'already_verified': True
+        }, status=status.HTTP_200_OK)
+
+    # Mark email as verified
+    user.email_verified = True
+    user.save()
+
+    return Response({
+        'message': 'Email verified successfully! You can now log in.',
+        'verified': True
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@ratelimit(key='user_or_ip', rate='3/h', method='POST')
+def resend_verification(request):
+    """
+    Resend verification email to user.
+    Rate limited to prevent abuse.
+    """
+    email = request.data.get('email')
+
+    if not email:
+        return Response({
+            'error': 'Email address is required.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = CustomUser.objects.get(email=email)
+    except CustomUser.DoesNotExist:
+        # Don't reveal if user exists or not
+        return Response({
+            'message': 'If an account exists with this email, a verification link has been sent.'
+        }, status=status.HTTP_200_OK)
+
+    # Check if email is already verified
+    if user.email_verified:
+        return Response({
+            'error': 'Email address is already verified. Please log in.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    # Check rate limiting (5 minutes between emails)
+    if user.last_verification_email_sent:
+        time_since_last_email = timezone.now() - user.last_verification_email_sent
+        if time_since_last_email.total_seconds() < 300:  # 5 minutes
+            minutes_left = int((300 - time_since_last_email.total_seconds()) / 60) + 1
+            return Response({
+                'error': f'Verification email was recently sent. Please wait {minutes_left} more minute(s) before requesting another.'
+            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+    # Try to send verification email
+    email_success, email_error = send_verification_email(user)
+
+    if email_success:
+        # Update last_verification_email_sent timestamp only on success
+        user.last_verification_email_sent = timezone.now()
+        user.save()
+
+        return Response({
+            'message': 'Verification email sent. Please check your inbox and spam folder.',
+            'email_sent': True
+        }, status=status.HTTP_200_OK)
+
+    # Don't update timestamp so user can retry immediately
+    return Response({
+        'error': 'Failed to send verification email. Please try again.',
+        'email_error': email_error
+    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated]) # ← Requires valid JWT token
 @ratelimit(key='user', rate='60/m', method='ALL')

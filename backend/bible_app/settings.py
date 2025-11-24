@@ -162,6 +162,7 @@ REST_FRAMEWORK = {
 }
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+
 # Simple JWT settings
 from datetime import timedelta
 
@@ -179,3 +180,11 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
+
+# Email verification settings
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 24  # 24 hours in seconds
+
+# SendGrid configuration
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+SENDGRID_FROM_EMAIL = os.environ.get('SENDGRID_FROM_EMAIL', 'noreply@biblememorization.com')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
