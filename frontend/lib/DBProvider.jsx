@@ -53,13 +53,13 @@ export function DBProvider({ children }) {
 
         initialize();
 
-        // Update sync status periodically
+        // Update sync status periodically (reduced frequency)
         const statusInterval = setInterval(async () => {
             if (isInitialized) {
                 const status = await getSyncStatus();
                 setSyncStatus(status);
             }
-        }, 5000); // Check every 5 seconds
+        }, 30000); // Check every 30 seconds
 
         // Cleanup on unmount
         return () => {

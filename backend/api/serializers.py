@@ -59,7 +59,7 @@ class UserSerializer(serializers.ModelSerializer):
 class HabitSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserHabit
-        fields = ['id', 'habit', 'frequency', 'purpose', 'day', 'time', 'reminder']
+        fields = ['id', 'habit', 'frequency', 'purpose', 'time', 'location', 'skipped']
         read_only_fields = ['id']
 
 
@@ -94,6 +94,7 @@ class StudyNoteSerializer(serializers.ModelSerializer):
         # Auto-assign the logged-in user
         validated_data['user'] = self.context['request'].user
         return super().create(validated_data)
+
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

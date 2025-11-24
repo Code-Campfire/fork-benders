@@ -31,23 +31,6 @@ export const profileAPI = {
     },
 
     /**
-     * Change password
-     * Requires online connection
-     * @param {string} oldPassword - Current password
-     * @param {string} newPassword - New password
-     * @returns {Promise} Success message
-     */
-    changePassword: async (oldPassword, newPassword) => {
-        if (!navigator.onLine) {
-            throw new Error('You must be online to change your password');
-        }
-        return api.post('/profile/change-password/', {
-            old_password: oldPassword,
-            new_password: newPassword,
-        });
-    },
-
-    /**
      * Upload avatar image
      * Requires online connection
      * @param {File} file - Image file (JPEG, PNG, GIF, or WEBP, max 5MB)

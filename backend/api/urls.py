@@ -16,6 +16,5 @@ urlpatterns = [
 
     # Profile management
     path('profile/', views.UserProfileDetailView.as_view(), name='profile-detail'),
-    path('profile/change-password/', views.change_password, name='change-password'),
     path('profile/avatar/', views.upload_avatar, name='upload-avatar'),
 ]

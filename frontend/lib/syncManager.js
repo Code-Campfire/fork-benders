@@ -1,10 +1,9 @@
 'use client';
 
 import { useAuthStore } from './auth-store';
+import { apiURL } from './config';
 import * as db from './db';
 
-const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 const REQUEST_TIMEOUT = 5000;
 
 let isInitialized = false;
@@ -20,17 +19,14 @@ export const initSyncManager = () => {
         return; // Skip on server-side or if already initialized
     }
 
-    console.log('🔄 Initializing Sync Manager...');
-
     // Listen for online event
     window.addEventListener('online', handleOnlineEvent);
 
     // Listen for offline event for logging
     window.addEventListener('offline', handleOfflineEvent);
 
-    // If already online, check for pending sync items
+    // If already online, check for pending sync items (silent check)
     if (navigator.onLine) {
-        console.log('✓ Online, checking for pending sync items...');
         syncData();
     }
 
@@ -44,8 +40,6 @@ export const cleanupSyncManager = () => {
     if (typeof window === 'undefined') {
         return;
     }
-
-    console.log('🔄 Cleaning up Sync Manager...');
 
     window.removeEventListener('online', handleOnlineEvent);
     window.removeEventListener('offline', handleOfflineEvent);
@@ -78,13 +72,11 @@ const handleOfflineEvent = () => {
 export const syncData = async () => {
     // Prevent concurrent sync operations
     if (isSyncing) {
-        console.log('⏳ Sync already in progress, skipping...');
         return { success: false, message: 'Sync already running' };
     }
 
     // Check if online
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
-        console.log('✗ Cannot sync - Device is offline');
         return { success: false, message: 'Device is offline' };
     }
 
@@ -94,7 +86,6 @@ export const syncData = async () => {
         // TODO: Check JWT validity from Step 5 before syncing
         // const isTokenValid = await checkTokenValidity();
         // if (!isTokenValid) {
-        //   console.log('🔐 Token expired, attempting refresh...');
         //   TODO: If token expired, attempt refresh from Step 5
         //   const refreshed = await refreshAccessToken();
         //   if (!refreshed) {
@@ -106,10 +97,10 @@ export const syncData = async () => {
         const queue = await db.getSyncQueue();
 
         if (queue.length === 0) {
-            console.log('✓ Sync queue is empty - Nothing to sync');
             return { success: true, processed: 0, failed: 0 };
         }
 
+        // Only log when we actually have items to sync
         console.log(`🔄 Processing ${queue.length} queued items...`);
 
         // Sort by timestamp (oldest first) for last-write-wins
@@ -122,17 +113,12 @@ export const syncData = async () => {
         // 4. For each item, attempt API request
         for (const item of queue) {
             try {
-                console.log(
-                    `📤 Syncing: ${item.method} ${item.endpoint} (${new Date(item.timestamp).toISOString()})`
-                );
-
                 const result = await syncQueueItem(item);
 
                 if (result.success) {
                     // 6. On success: remove from queue, update local cache
                     await db.clearSyncQueueItem(item.id);
                     processed++;
-                    console.log(`✓ Synced: ${item.endpoint}`);
                 } else {
                     // 7. On failure: keep in queue for next sync
                     failed++;
@@ -216,10 +202,7 @@ const syncQueueItem = async (item) => {
             fetchOptions.body = JSON.stringify(requestData);
         }
 
-        const response = await fetch(
-            `${API_BASE_URL}${item.endpoint}`,
-            fetchOptions
-        );
+        const response = await fetch(`${apiURL}${item.endpoint}`, fetchOptions);
 
         clearTimeout(timeoutId);
 
@@ -282,11 +265,10 @@ const syncQueueItem = async (item) => {
  * Manual sync trigger (exposed for user-initiated sync)
  */
 export const triggerManualSync = async () => {
-    console.log('🔄 Manual sync triggered by user...');
+    console.log('🔄 Manual sync triggered by user');
 
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
         const message = 'Cannot sync while offline';
-        console.log(`✗ ${message}`);
         showNotification(message);
         return { success: false, message };
     }
@@ -386,7 +368,7 @@ export const requestNotificationPermission = async () => {
 export const clearSyncQueue = async () => {
     try {
         await db.clearAllSyncQueue();
-        console.log('✓ Sync queue cleared');
+        console.log('✓ Sync queue cleared by user');
         return { success: true };
     } catch (error) {
         console.error('Failed to clear sync queue:', error);

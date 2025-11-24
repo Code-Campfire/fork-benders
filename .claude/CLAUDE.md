@@ -49,7 +49,18 @@ fork-benders/
 │   ├── bible_app/                            # Django project settings
 │   ├── manage.py
 │   └── requirements.txt
-├── frontend/                                  # React app
+├── frontend/                                  # Next.js app
+│   ├── api/                                   # API-specific client code
+│   ├── app/                                   # Next.js App Router pages
+│   ├── components/                            # React components
+│   ├── lib/                                   # Utility libraries
+│   │   ├── config.js                         # Centralized API configuration
+│   │   ├── api.js                            # API client
+│   │   ├── apiClient.js                      # API client utilities
+│   │   ├── syncManager.js                    # Sync management
+│   │   ├── db.js                             # Database utilities
+│   │   └── ...
+│   └── public/                               # Static assets
 └── docker-compose.yml
 ```
 
@@ -109,6 +120,7 @@ docker compose exec backend python manage.py test api.tests.test_fetch_bible_dat
 - **Python Version:** 3.12
 - **All backend code changes auto-sync to Docker** via volume mount
 - **Dependencies:** After adding to `requirements.txt`, rebuild with `docker compose build backend`
+- **Frontend dependencies:** After adding to `package.json`, run `npm install` in frontend directory or rebuild with `docker compose build frontend`
 - **Run tests before creating PRs**
 
 ---

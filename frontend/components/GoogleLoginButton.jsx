@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 import { useAuthStore } from '../lib/auth-store';
+import { authURL } from '../lib/config';
 
 export default function GoogleLoginButton() {
     const router = useRouter();
@@ -42,15 +43,12 @@ export default function GoogleLoginButton() {
 
     const handleCallbackResponse = async (response) => {
         try {
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/auth/google/`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ token: response.credential }),
-                }
-            );
+            const res = await fetch(`${authURL}/google/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ token: response.credential }),
+            });
 
             const data = await res.json();
 

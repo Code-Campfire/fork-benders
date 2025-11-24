@@ -2,7 +2,6 @@
 
 import {
     User,
-    Lock,
     Settings,
     Upload,
     AlertCircle,
@@ -37,11 +36,6 @@ export default function ProfilePage() {
     const [displayName, setDisplayName] = useState('');
     const [reviewGoal, setReviewGoal] = useState(10);
     const [notifHour, setNotifHour] = useState(9);
-
-    // Password change state
-    const [oldPassword, setOldPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
 
     // Avatar state
     const [avatarFile, setAvatarFile] = useState(null);
@@ -121,59 +115,6 @@ export default function ProfilePage() {
         } catch (error) {
             const errorMsg = error.response?.data?.error || error.message;
             showMessage('error', 'Update Failed', errorMsg);
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    // Handle password change
-    const handleChangePassword = async (e) => {
-        e.preventDefault();
-        if (!isOnline) {
-            showMessage(
-                'error',
-                'Offline',
-                'You must be online to change your password'
-            );
-            return;
-        }
-
-        if (newPassword !== confirmPassword) {
-            showMessage(
-                'error',
-                'Password Mismatch',
-                'New passwords do not match'
-            );
-            return;
-        }
-
-        if (newPassword.length < 8) {
-            showMessage(
-                'error',
-                'Password Too Short',
-                'Password must be at least 8 characters'
-            );
-            return;
-        }
-
-        setSaving(true);
-        try {
-            await profileAPI.changePassword(oldPassword, newPassword);
-            setOldPassword('');
-            setNewPassword('');
-            setConfirmPassword('');
-            showMessage(
-                'success',
-                'Password Changed',
-                'Your password has been updated successfully'
-            );
-        } catch (error) {
-            const errorMsg = error.response?.data?.error || error.message;
-            showMessage(
-                'error',
-                'Change Failed',
-                Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg
-            );
         } finally {
             setSaving(false);
         }
@@ -311,14 +252,10 @@ export default function ProfilePage() {
                 onValueChange={setActiveTab}
                 className="space-y-6"
             >
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="profile">
                         <User className="h-4 w-4 mr-2" />
                         Profile
-                    </TabsTrigger>
-                    <TabsTrigger value="security">
-                        <Lock className="h-4 w-4 mr-2" />
-                        Security
                     </TabsTrigger>
                     <TabsTrigger value="settings">
                         <Settings className="h-4 w-4 mr-2" />
@@ -444,85 +381,6 @@ export default function ProfilePage() {
                                     className="w-full sm:w-auto"
                                 >
                                     {saving ? 'Saving...' : 'Save Changes'}
-                                </Button>
-                            </form>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
-                {/* Security Tab */}
-                <TabsContent value="security" className="space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Change Password</CardTitle>
-                            <CardDescription>
-                                Update your password to keep your account secure
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <form
-                                onSubmit={handleChangePassword}
-                                className="space-y-4"
-                            >
-                                <div className="space-y-2">
-                                    <Label htmlFor="oldPassword">
-                                        Current Password
-                                    </Label>
-                                    <Input
-                                        id="oldPassword"
-                                        type="password"
-                                        value={oldPassword}
-                                        onChange={(e) =>
-                                            setOldPassword(e.target.value)
-                                        }
-                                        disabled={!isOnline || saving}
-                                        required
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="newPassword">
-                                        New Password
-                                    </Label>
-                                    <Input
-                                        id="newPassword"
-                                        type="password"
-                                        value={newPassword}
-                                        onChange={(e) =>
-                                            setNewPassword(e.target.value)
-                                        }
-                                        disabled={!isOnline || saving}
-                                        required
-                                        minLength={8}
-                                    />
-                                    <p className="text-sm text-muted-foreground">
-                                        Must be at least 8 characters
-                                    </p>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="confirmPassword">
-                                        Confirm New Password
-                                    </Label>
-                                    <Input
-                                        id="confirmPassword"
-                                        type="password"
-                                        value={confirmPassword}
-                                        onChange={(e) =>
-                                            setConfirmPassword(e.target.value)
-                                        }
-                                        disabled={!isOnline || saving}
-                                        required
-                                        minLength={8}
-                                    />
-                                </div>
-
-                                <Button
-                                    type="submit"
-                                    disabled={!isOnline || saving}
-                                    className="w-full sm:w-auto"
-                                >
-                                    {saving ? 'Changing...' : 'Change Password'}
                                 </Button>
                             </form>
                         </CardContent>
