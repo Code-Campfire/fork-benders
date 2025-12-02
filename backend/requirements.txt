@@ -12,3 +12,4 @@ google-auth-oauthlib
 google-auth-httplib2
 django-ratelimit==4.1.0
 sendgrid==6.11.0
+Pillow>=10.0.0

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from .models import CustomUser, UserHabit, RecentVerse, StudyNote
+from .models import CustomUser, UserHabit, RecentVerse, StudyNote, UserProfile
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -97,3 +97,49 @@ class StudyNoteSerializer(serializers.ModelSerializer):
         # Auto-assign the logged-in user
         validated_data['user'] = self.context['request'].user
         return super().create(validated_data)
+
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    """Serializer for user profile with nested user data."""
+
+    email = serializers.EmailField(source='user.email', read_only=True)
+    avatar = serializers.ImageField(source='user.avatar', read_only=True)
+    avatar_url = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(source='user.created_at', read_only=True)
+    last_login = serializers.DateTimeField(source='user.last_login', read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            'email',
+            'avatar',
+            'avatar_url',
+            'display_name',
+            'default_translation',
+            'review_goal_per_day',
+            'notif_hour',
+            'accessibility_json',
+            'created_at',
+            'last_login'
+        ]
+
+    def get_avatar_url(self, obj):
+        """Return full URL for avatar if it exists."""
+        if obj.user.avatar:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.user.avatar.url)
+        return None
+
+    def validate_review_goal_per_day(self, value):
+        """Validate review goal is between 1 and 100."""
+        if value < 1 or value > 100:
+            raise serializers.ValidationError('Review goal must be between 1 and 100.')
+        return value
+
+    def validate_notif_hour(self, value):
+        """Validate notification hour is between 0 and 23."""
+        if value is not None and (value < 0 or value > 23):
+            raise serializers.ValidationError('Notification hour must be between 0 and 23.')
+        return value
