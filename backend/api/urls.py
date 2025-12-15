@@ -17,4 +17,8 @@ urlpatterns = [
     path('recent-verses/', views.recent_verses_view, name='recent-verses'),
     path('study-notes/', views.study_notes, name='study-notes'),
     path('auth/google/', GoogleLoginView.as_view(), name='google-login'),
+
+    # Profile management
+    path('profile/', views.UserProfileDetailView.as_view(), name='profile-detail'),
+    path('profile/avatar/', views.upload_avatar, name='upload-avatar'),
 ]

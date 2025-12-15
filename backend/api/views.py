@@ -11,11 +11,13 @@ from django.utils.encoding import force_bytes, force_str
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
+from django.contrib.auth.password_validation import validate_password
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 
@@ -30,9 +32,10 @@ from .serializers import (
     HabitSerializer,
     RecentVerseSerializer,
     DashboardSerializer,
-    StudyNoteSerializer
+    StudyNoteSerializer,
+    UserProfileSerializer
 )
-from .models import CustomUser, UserHabit, RecentVerse, Verse, Book, StudyNote
+from .models import CustomUser, UserHabit, RecentVerse, Verse, Book, StudyNote, UserProfile
 
 
 @api_view(['GET'])
@@ -491,3 +494,66 @@ def habits(request): #STEP 6: Read Line 364
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 #  NEXT Go to Database Model: backend/api/models.py:109-129
+
+
+class UserProfileDetailView(RetrieveUpdateAPIView):
+    """
+    GET: Retrieve user profile (auto-creates if doesn't exist)
+    PATCH: Update user profile fields
+    """
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        """Auto-create profile using get_or_create."""
+        profile, created = UserProfile.objects.get_or_create(user=self.request.user)
+        return profile
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@ratelimit(key='user', rate='10/h', method='POST')
+def upload_avatar(request):
+    """Upload user avatar image."""
+    avatar_file = request.FILES.get('avatar')
+
+    if not avatar_file:
+        return Response(
+            {'error': 'No file provided'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Validate file type
+    allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    if avatar_file.content_type not in allowed_types:
+        return Response(
+            {'error': 'Invalid file type. Allowed: JPEG, PNG, GIF, WEBP'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Validate file size (max 5MB)
+    max_size = 5 * 1024 * 1024  # 5MB
+    if avatar_file.size > max_size:
+        return Response(
+            {'error': 'File too large. Maximum size is 5MB'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Delete old avatar if exists
+    if request.user.avatar:
+        request.user.avatar.delete(save=False)
+
+    # Save new avatar
+    request.user.avatar = avatar_file
+    request.user.save()
+
+    # Return full URL
+    avatar_url = request.build_absolute_uri(request.user.avatar.url)
+
+    return Response(
+        {
+            'message': 'Avatar uploaded successfully',
+            'avatar_url': avatar_url
+        },
+        status=status.HTTP_200_OK
+    )

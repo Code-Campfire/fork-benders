@@ -60,13 +60,11 @@ export const getBibleContent = async (endpoint, cacheKey) => {
         // 1. Check IndexedDB first
         const cached = await db.getVerse(cacheKey);
         if (cached) {
-            console.log(`📦 Cache hit: ${cacheKey}`);
             return { data: cached, source: 'cache' };
         }
 
         // 2. If not found AND online, fetch and cache
         if (isOnline()) {
-            console.log(`🌐 Fetching from API: ${endpoint}`);
             const response = await fetchWithTimeout(`${apiURL}${endpoint}`);
 
             if (!response.ok) {
@@ -105,13 +103,11 @@ export const getVersesByBook = async (book) => {
         // Check cache first
         const cached = await db.getVersesByBook(book);
         if (cached && cached.length > 0) {
-            console.log(`📦 Cache hit: ${book} (${cached.length} verses)`);
             return { data: cached, source: 'cache' };
         }
 
         // Fetch if online
         if (isOnline()) {
-            console.log(`🌐 Fetching from API: /verses/book/${book}`);
             const response = await fetchWithTimeout(
                 `${apiURL}/verses/book/${book}`
             );
@@ -147,7 +143,6 @@ export const getUserData = async (endpoint, cacheStore, cacheKey) => {
     try {
         // 1. If online, attempt API request
         if (isOnline()) {
-            console.log(`🌐 Fetching from API: ${endpoint}`);
             const response = await fetchWithTimeout(`${apiURL}${endpoint}`);
 
             // TODO: Handle 401 with JWT refresh from Step 5
@@ -170,7 +165,6 @@ export const getUserData = async (endpoint, cacheStore, cacheKey) => {
         }
 
         // 4. On failure/timeout/offline, return IndexedDB cache
-        console.log('📦 Offline, checking cache...');
         let cached;
 
         if (cacheStore === 'studyNotes') {
@@ -234,7 +228,6 @@ export const mutateData = async (endpoint, method, data, options = {}) => {
     try {
         // 1. If online, POST to API
         if (isOnline()) {
-            console.log(`🌐 ${method} to API: ${endpoint}`);
             const response = await fetchWithTimeout(`${apiURL}${endpoint}`, {
                 method,
                 body: JSON.stringify(data),
@@ -269,7 +262,6 @@ export const mutateData = async (endpoint, method, data, options = {}) => {
         }
 
         // 4. If offline, add to syncQueue in IndexedDB
-        console.log('📦 Offline, adding to sync queue...');
         await db.addToSyncQueue({
             endpoint,
             method,
@@ -371,12 +363,15 @@ export const updateSettings = async (settings) => {
  */
 export const processSyncQueue = async () => {
     if (!isOnline()) {
-        console.log('Still offline, skipping sync');
         return { processed: 0, failed: 0 };
     }
 
     const queue = await db.getSyncQueue();
-    console.log(`🔄 Processing ${queue.length} queued items...`);
+
+    // Only log if there are items to process
+    if (queue.length > 0) {
+        console.log(`🔄 Processing ${queue.length} queued items...`);
+    }
 
     let processed = 0;
     let failed = 0;
@@ -405,7 +400,6 @@ export const processSyncQueue = async () => {
                 // Remove from queue
                 await db.clearSyncQueueItem(item.id);
                 processed++;
-                console.log(`✓ Synced: ${item.endpoint}`);
             } else {
                 failed++;
                 console.error(`✗ Failed to sync: ${item.endpoint}`);
@@ -416,6 +410,11 @@ export const processSyncQueue = async () => {
         }
     }
 
-    console.log(`✓ Sync complete: ${processed} processed, ${failed} failed`);
+    // Only log completion if items were processed
+    if (queue.length > 0) {
+        console.log(
+            `✓ Sync complete: ${processed} processed, ${failed} failed`
+        );
+    }
     return { processed, failed };
 };
