@@ -23,7 +23,6 @@ from api.views import GoogleLoginView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
-    path('auth/google/', GoogleLoginView.as_view(), name='google-login'),
 ]
 
 # Serve media files in development
