@@ -33,9 +33,12 @@ from .serializers import (
     RecentVerseSerializer,
     DashboardSerializer,
     StudyNoteSerializer,
-    UserProfileSerializer
+    UserProfileSerializer,
+    TranslationSerializer,
+    BookSerializer,
+    ChapterSerializer
 )
-from .models import CustomUser, UserHabit, RecentVerse, Verse, Book, StudyNote, UserProfile
+from .models import CustomUser, UserHabit, RecentVerse, Verse, Book, StudyNote, UserProfile, Translation
 
 
 @api_view(['GET'])
@@ -557,3 +560,98 @@ def upload_avatar(request):
         },
         status=status.HTTP_200_OK
     )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@ratelimit(key='user', rate='60/m', method='GET')
+def translations_list(request):
+    """Get all public translations."""
+    translations = Translation.objects.filter(is_public=True).order_by('code')
+    serializer = TranslationSerializer(translations, many=True)
+    return Response({
+        'translations': serializer.data
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@ratelimit(key='user', rate='60/m', method='GET')
+def books_list(request):
+    """Get all books for a selected translation."""
+    translation_code = request.query_params.get('translation')
+
+    if not translation_code:
+        return Response({
+            'error': 'Translation parameter is required.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        translation = Translation.objects.get(code=translation_code)
+    except Translation.DoesNotExist:
+        return Response({
+            'error': f'Translation "{translation_code}" not found.'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    # Get all books that have verses in this translation
+    books = Book.objects.filter(
+        verses__translation=translation
+    ).distinct().order_by('canon_order')
+
+    serializer = BookSerializer(books, many=True)
+    return Response({
+        'books': serializer.data
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@ratelimit(key='user', rate='60/m', method='GET')
+def chapters_list(request):
+    """Get all chapters with verse counts for a selected book and translation."""
+    translation_code = request.query_params.get('translation')
+    book_id = request.query_params.get('book')
+
+    if not translation_code:
+        return Response({
+            'error': 'Translation parameter is required.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    if not book_id:
+        return Response({
+            'error': 'Book parameter is required.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        translation = Translation.objects.get(code=translation_code)
+    except Translation.DoesNotExist:
+        return Response({
+            'error': f'Translation "{translation_code}" not found.'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        book = Book.objects.get(id=book_id)
+    except Book.DoesNotExist:
+        return Response({
+            'error': f'Book with id "{book_id}" not found.'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    # Get all unique chapters with their verse counts
+    from django.db.models import Count
+    chapters_data = Verse.objects.filter(
+        translation=translation,
+        book=book
+    ).values('chapter').annotate(
+        verse_count=Count('id')
+    ).order_by('chapter')
+
+    # Convert to list of dicts for serializer
+    chapters = [
+        {'chapter': item['chapter'], 'verse_count': item['verse_count']}
+        for item in chapters_data
+    ]
+
+    serializer = ChapterSerializer(chapters, many=True)
+    return Response({
+        'chapters': serializer.data
+    }, status=status.HTTP_200_OK)

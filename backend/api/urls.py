@@ -21,4 +21,9 @@ urlpatterns = [
     # Profile management
     path('profile/', views.UserProfileDetailView.as_view(), name='profile-detail'),
     path('profile/avatar/', views.upload_avatar, name='upload-avatar'),
+
+    # Content selection endpoints
+    path('translations/', views.translations_list, name='translations-list'),
+    path('books/', views.books_list, name='books-list'),
+    path('chapters/', views.chapters_list, name='chapters-list'),
 ]

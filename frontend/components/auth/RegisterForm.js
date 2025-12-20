@@ -6,6 +6,7 @@ import { useState } from 'react';
 
 import { authAPI } from '../../lib/api';
 import { useAuthStore } from '../../lib/auth-store';
+import { apiURL } from '../../lib/config';
 import {
     validatePassword,
     getPasswordStrength,
@@ -53,9 +54,7 @@ export default function RegisterForm() {
         setResendSuccess(false);
 
         try {
-            const apiUrl =
-                process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-            await axios.post(`${apiUrl}/auth/resend-verification/`, {
+            await axios.post(`${apiURL}/auth/resend-verification/`, {
                 email: formData.email,
             });
 
