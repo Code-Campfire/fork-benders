@@ -40,3 +40,10 @@ One query instead. The AC for this ticket says get all verses, I think we probab
 This doesnt add too much complexity, and I think ultimetly we’ll need an endpoint for 1 verse.
 
 
+ Summary:
+  GET /api/verses/ endpoint
+  Required params: translation, book, chapter
+  Optional param: verse
+  Query optimization with select_related()
+  Proper error handling (400/404)
+   Tested in Postman
