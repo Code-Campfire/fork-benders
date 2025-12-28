@@ -36,7 +36,8 @@ from .serializers import (
     UserProfileSerializer,
     TranslationSerializer,
     BookSerializer,
-    ChapterSerializer
+    ChapterSerializer,
+    VerseSerializer
 )
 from .models import CustomUser, UserHabit, RecentVerse, Verse, Book, StudyNote, UserProfile, Translation
 
@@ -654,4 +655,79 @@ def chapters_list(request):
     serializer = ChapterSerializer(chapters, many=True)
     return Response({
         'chapters': serializer.data
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def verses_list(request):
+    """
+    Get verses for a selected translation, book, and chapter.
+    Optionally filter to a specific verse number.
+    """
+    translation_code = request.query_params.get('translation')
+    book_id = request.query_params.get('book')
+    chapter = request.query_params.get('chapter')
+    verse_num = request.query_params.get('verse')  # Optional
+
+    # Validate required parameters
+    if not translation_code:
+        return Response({
+            'error': 'Translation parameter is required.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    if not book_id:
+        return Response({
+            'error': 'Book parameter is required.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    if not chapter:
+        return Response({
+            'error': 'Chapter parameter is required.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    # Validate translation exists
+    try:
+        translation = Translation.objects.get(code=translation_code)
+    except Translation.DoesNotExist:
+        return Response({
+            'error': f'Translation "{translation_code}" not found.'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    # Validate book exists
+    try:
+        book = Book.objects.get(id=book_id)
+    except Book.DoesNotExist:
+        return Response({
+            'error': f'Book with id "{book_id}" not found.'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    # Build the query with select_related for optimization
+    verses_query = Verse.objects.filter(
+        translation=translation,
+        book=book,
+        chapter=chapter
+    ).select_related('book', 'translation').order_by('verse_num')
+
+    # If specific verse is requested, filter to just that verse
+    if verse_num:
+        verses_query = verses_query.filter(verse_num=verse_num)
+
+    # Execute query
+    verses = list(verses_query)
+
+    # Check if the combination exists
+    if not verses:
+        if verse_num:
+            return Response({
+                'error': f'Verse not found for {book.short_name} {chapter}:{verse_num} in {translation_code}.'
+            }, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({
+                'error': f'No verses found for {book.short_name} {chapter} in {translation_code}.'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = VerseSerializer(verses, many=True)
+    return Response({
+        'verses': serializer.data
     }, status=status.HTTP_200_OK)

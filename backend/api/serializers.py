@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from .models import CustomUser, UserHabit, RecentVerse, StudyNote, UserProfile, Translation, Book
+from .models import CustomUser, UserHabit, RecentVerse, StudyNote, UserProfile, Translation, Book, Verse
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -167,3 +167,15 @@ class ChapterSerializer(serializers.Serializer):
 
     chapter = serializers.IntegerField()
     verse_count = serializers.IntegerField()
+
+
+class VerseSerializer(serializers.ModelSerializer):
+    """Serializer for Bible verses with nested translation and book info."""
+
+    translation = TranslationSerializer(read_only=True)
+    book = BookSerializer(read_only=True)
+
+    class Meta:
+        model = Verse
+        fields = ['id', 'translation', 'book', 'chapter', 'verse_num', 'text']
+        read_only_fields = ['id']
