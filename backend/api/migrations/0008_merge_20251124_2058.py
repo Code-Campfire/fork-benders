@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0004_customuser_email_verified_and_more'),
+        ('api', '0006_merge_20251118_2233'),
         ('api', '0007_remove_email_verified_fields'),
     ]
 

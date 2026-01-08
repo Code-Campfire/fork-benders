@@ -4,6 +4,7 @@
 import time
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.db.models import Max
 import requests
 from tqdm import tqdm
 
@@ -159,6 +160,14 @@ class Command(BaseCommand):
                     # Bulk create verses
                     Verse.objects.bulk_create(verse_instances, batch_size=1000)
                     stats['verses_created'] += len(verse_instances)
+
+                    # Update chapter_count for this book
+                    max_chapter = Verse.objects.filter(book=book).aggregate(
+                        max_chapter=Max('chapter')
+                    )['max_chapter']
+                    if max_chapter is not None:
+                        book.chapter_count = max_chapter
+                        book.save()
 
             except Exception as e:
                 error_msg = f"Error importing {book_data['name']}: {str(e)}"

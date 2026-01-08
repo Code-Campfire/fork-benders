@@ -154,6 +154,10 @@ class Book(models.Model):
         choices=Testament.choices,
         help_text="OT or NT"
     )
+    chapter_count = models.IntegerField(
+        default=0,
+        help_text="Total number of chapters in this book"
+    )
 
     class Meta:
         db_table = 'books'
