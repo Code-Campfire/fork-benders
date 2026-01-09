@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from .models import CustomUser, UserHabit, RecentVerse, StudyNote, UserProfile
+from .models import CustomUser, UserHabit, RecentVerse, StudyNote, UserProfile, Translation, Book
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -143,3 +143,27 @@ class UserProfileSerializer(serializers.ModelSerializer):
         if value is not None and (value < 0 or value > 23):
             raise serializers.ValidationError('Notification hour must be between 0 and 23.')
         return value
+
+
+class TranslationSerializer(serializers.ModelSerializer):
+    """Serializer for Bible translations."""
+
+    class Meta:
+        model = Translation
+        fields = ['code', 'name']
+
+
+class BookSerializer(serializers.ModelSerializer):
+    """Serializer for Bible books with chapter count."""
+
+    class Meta:
+        model = Book
+        fields = ['id', 'short_name', 'name', 'testament', 'chapter_count']
+        read_only_fields = ['id']
+
+
+class ChapterSerializer(serializers.Serializer):
+    """Serializer for chapter data with verse count."""
+
+    chapter = serializers.IntegerField()
+    verse_count = serializers.IntegerField()

@@ -1,0 +1,12 @@
+name: PR Notification
+on:
+  pull_request:
+    types: [opened]
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -X POST ${{ secrets.PR_O_CLOCK }} \
+          -H 'Content-Type: application/json' \
+          -d '{"text":"<!here> New PR: ${{ github.event.pull_request.title }} - ${{ github.event.pull_request.html_url }}"}'
