@@ -1,17 +1,55 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 
 import LogoutButton from '../../components/auth/LogoutButton';
 import ProtectedRoute from '../../components/auth/ProtectedRoute';
 import HabitReminderModal from '../../components/habits/HabitReminderModal.js';
+import { habitAPI } from '../../lib/api';
 import { useAuthStore } from '../../lib/auth-store';
+import { profileAPI } from '../../lib/profileAPI';
 
 export default function DashboardPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const { user } = useAuthStore();
+    const router = useRouter();
+
+    // Check profile completion, then habits
+    useEffect(() => {
+        const checkOnboarding = async () => {
+            try {
+                // First, check if profile is complete
+                const profileResponse = await profileAPI.getUserProfile();
+                const profile = profileResponse.data;
+
+                // Profile is incomplete if display_name is missing
+                const isProfileIncomplete =
+                    !profile.display_name || profile.display_name.trim() === '';
+
+                if (isProfileIncomplete) {
+                    // Redirect to profile setup
+                    router.push('/profile-setup');
+                    return;
+                }
+
+                // Profile is complete, now check for habits
+                const habitsResponse = await habitAPI.getAll();
+                const habits = habitsResponse.data;
+
+                // If user has no habits, open the modal
+                if (habits.length === 0) {
+                    setIsModalOpen(true);
+                }
+            } catch {
+                // Don't redirect or open modal on error - let user manually navigate
+            }
+        };
+
+        checkOnboarding();
+    }, [router]);
 
     return (
         <ProtectedRoute>
