@@ -169,6 +169,26 @@ class ChapterSerializer(serializers.Serializer):
     verse_count = serializers.IntegerField()
 
 
+class VerseQueryParamsSerializer(serializers.Serializer):
+    """Serializer for validating verses endpoint query parameters."""
+
+    translation = serializers.CharField(required=True, error_messages={
+        'required': 'Translation parameter is required.',
+        'blank': 'Translation parameter cannot be blank.'
+    })
+    book = serializers.IntegerField(required=True, error_messages={
+        'required': 'Book parameter is required.',
+        'invalid': 'Book parameter must be a valid integer.'
+    })
+    chapter = serializers.IntegerField(required=True, error_messages={
+        'required': 'Chapter parameter is required.',
+        'invalid': 'Chapter parameter must be a valid integer.'
+    })
+    verse = serializers.IntegerField(required=False, allow_null=True, error_messages={
+        'invalid': 'Verse parameter must be a valid integer.'
+    })
+
+
 class VerseSerializer(serializers.ModelSerializer):
     """Serializer for Bible verses with nested translation and book info."""
 

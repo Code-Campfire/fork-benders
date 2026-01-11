@@ -37,6 +37,7 @@ from .serializers import (
     TranslationSerializer,
     BookSerializer,
     ChapterSerializer,
+    VerseQueryParamsSerializer,
     VerseSerializer
 )
 from .models import CustomUser, UserHabit, RecentVerse, Verse, Book, StudyNote, UserProfile, Translation
@@ -665,26 +666,20 @@ def verses_list(request):
     Get verses for a selected translation, book, and chapter.
     Optionally filter to a specific verse number.
     """
-    translation_code = request.query_params.get('translation')
-    book_id = request.query_params.get('book')
-    chapter = request.query_params.get('chapter')
-    verse_num = request.query_params.get('verse')  # Optional
-
-    # Validate required parameters
-    if not translation_code:
+    # Validate query parameters using serializer
+    params_serializer = VerseQueryParamsSerializer(data=request.query_params)
+    if not params_serializer.is_valid():
+        # Return first error message
+        first_error = next(iter(params_serializer.errors.values()))[0]
         return Response({
-            'error': 'Translation parameter is required.'
+            'error': str(first_error)
         }, status=status.HTTP_400_BAD_REQUEST)
 
-    if not book_id:
-        return Response({
-            'error': 'Book parameter is required.'
-        }, status=status.HTTP_400_BAD_REQUEST)
-
-    if not chapter:
-        return Response({
-            'error': 'Chapter parameter is required.'
-        }, status=status.HTTP_400_BAD_REQUEST)
+    # Extract validated data
+    translation_code = params_serializer.validated_data['translation']
+    book_id = params_serializer.validated_data['book']
+    chapter = params_serializer.validated_data['chapter']
+    verse_num = params_serializer.validated_data.get('verse')
 
     # Validate translation exists
     try:
@@ -710,7 +705,7 @@ def verses_list(request):
     ).select_related('book', 'translation').order_by('verse_num')
 
     # If specific verse is requested, filter to just that verse
-    if verse_num:
+    if verse_num is not None:
         verses_query = verses_query.filter(verse_num=verse_num)
 
     # Execute query
