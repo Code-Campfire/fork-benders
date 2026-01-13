@@ -32,15 +32,11 @@ export function DBProvider({ children }) {
         const initialize = async () => {
             try {
                 // Initialize database
-                console.log('🔧 Initializing database...');
                 await db.initDB();
                 setIsInitialized(true);
-                console.log('✓ Database initialized');
 
                 // Initialize sync manager after DB is ready
-                console.log('🔧 Initializing sync manager...');
                 initSyncManager();
-                console.log('✓ Sync manager initialized');
 
                 // Get initial sync status
                 const status = await getSyncStatus();
