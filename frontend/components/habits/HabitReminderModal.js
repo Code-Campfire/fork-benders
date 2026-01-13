@@ -15,7 +15,6 @@ export default function HabitReminderModal({ isOpen, onClose }) {
     const [currentStep, setCurrentStep] = useState(1);
     //prevents double-submits v
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState(null);
     const [habitData, setHabitData] = useState({
         habit: 'habit',
         frequency: 'null',
@@ -30,27 +29,24 @@ export default function HabitReminderModal({ isOpen, onClose }) {
         if (isSubmitting) return;
 
         setIsSubmitting(true);
-        setError(null);
 
         try {
             const payload = {
                 ...habitData,
                 skipped: isSkipped,
             };
-            const createdHabit = await habitAPI.create(payload);
-            console.log('Habit Created:', { createdHabit });
+            await habitAPI.create(payload);
             isSkipped === false
                 ? alert('Congratulations! Habit has been confirmed')
                 : null;
             handleClose();
         } catch (err) {
             // Axios error objects have error.response.data for server errors
-            setError(
+            const errorMessage =
                 err.response?.data?.detail ||
-                    err.response?.data?.message ||
-                    'Failed to create habit'
-            );
-            console.log('setError is:', error);
+                err.response?.data?.message ||
+                'Failed to create habit';
+            alert(`Error: ${errorMessage}`);
         } finally {
             setIsSubmitting(false);
         }
@@ -78,7 +74,6 @@ export default function HabitReminderModal({ isOpen, onClose }) {
 
         // Reset all state to initial values
         setCurrentStep(1);
-        setError(null);
         setHabitData({
             habit: '',
             frequency: '',
