@@ -161,7 +161,7 @@ export function getStepDescription(currentStep, habitData, setHabitData) {
                                 placeholder="location"
                                 className="inline-block w-auto min-w-16 border-0 border-b-2 border-red-500 rounded-none px-1 py-0 h-auto bg-transparent focus:ring-0"
                             />
-                            {console.log('Purpose is:', habitData?.location)},
+                            ,
                         </div>
                         <div>
                             so that I can become{' '}
@@ -176,9 +176,7 @@ export function getStepDescription(currentStep, habitData, setHabitData) {
                                 placeholder="type of person I want to be"
                                 className="inline-block w-auto min-w-16 border-0 border-b-2 border-red-500 rounded-none px-1 py-0 h-auto bg-transparent focus:ring-0"
                             />
-                            {console.log('Purpose is:', habitData?.purpose)}
                         </div>
-                        {console.log('Entire state is:', habitData)}
                         <div className="mt-5">
                             <p>*Please select PM or AM.</p>
                         </div>
