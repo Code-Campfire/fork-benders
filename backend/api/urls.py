@@ -26,4 +26,5 @@ urlpatterns = [
     path('translations/', views.translations_list, name='translations-list'),
     path('books/', views.books_list, name='books-list'),
     path('chapters/', views.chapters_list, name='chapters-list'),
+    path('verses/', views.verses_list, name='verses-list'),
 ]
