@@ -1,6 +1,7 @@
 'use client';
 
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -18,23 +19,36 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { useAuthStore } from '@/lib/auth-store';
 import { apiURL } from '@/lib/config';
 
 export default function SettingsPage() {
-    const [user, setUser] = useState(null);
+    const { user, accessToken, isAuthenticated } = useAuthStore();
+    const router = useRouter();
     const [password, setPassword] = useState('');
     const [deletionDate, setDeletionDate] = useState(null);
     const [daysRemaining, setDaysRemaining] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [userWithDeletion, setUserWithDeletion] = useState(null);
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            router.push('/login');
+            return;
+        }
+        if (accessToken) {
+            fetchUserData();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [accessToken, isAuthenticated]);
 
     const fetchUserData = async () => {
         try {
-            const token = localStorage.getItem('access_token');
             const response = await axios.get(`${apiURL}/auth/profile/`, {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${accessToken}` },
             });
-            setUser(response.data);
+            setUserWithDeletion(response.data);
 
             if (response.data.deletion_requested_at) {
                 calculateDaysRemaining(response.data.deletion_requested_at);
@@ -43,11 +57,6 @@ export default function SettingsPage() {
             setError('Failed to load user data');
         }
     };
-
-    useEffect(() => {
-        fetchUserData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     const calculateDaysRemaining = (deletionRequestedAt) => {
         const requestDate = new Date(deletionRequestedAt);
@@ -71,16 +80,15 @@ export default function SettingsPage() {
         setError('');
 
         try {
-            const token = localStorage.getItem('access_token');
             const response = await axios.post(
                 `${apiURL}/auth/request-deletion/`,
                 { password },
-                { headers: { Authorization: `Bearer ${token}` } }
+                { headers: { Authorization: `Bearer ${accessToken}` } }
             );
 
             alert(response.data.message);
             setPassword('');
-            fetchUserData();
+            await fetchUserData();
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to request deletion');
         } finally {
@@ -90,16 +98,17 @@ export default function SettingsPage() {
 
     const handleCancelDeletion = async () => {
         setLoading(true);
+        setError('');
+
         try {
-            const token = localStorage.getItem('access_token');
             const response = await axios.post(
                 `${apiURL}/auth/cancel-deletion/`,
                 {},
-                { headers: { Authorization: `Bearer ${token}` } }
+                { headers: { Authorization: `Bearer ${accessToken}` } }
             );
 
             alert(response.data.message);
-            fetchUserData();
+            await fetchUserData();
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to cancel deletion');
         } finally {
@@ -109,9 +118,8 @@ export default function SettingsPage() {
 
     const handleExportData = async () => {
         try {
-            const token = localStorage.getItem('access_token');
             const response = await axios.get(`${apiURL}/auth/export-data/`, {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${accessToken}` },
             });
 
             const blob = new Blob([JSON.stringify(response.data, null, 2)], {
@@ -122,24 +130,31 @@ export default function SettingsPage() {
             a.href = url;
             a.download = 'user_data.json';
             a.click();
+            window.URL.revokeObjectURL(url);
         } catch (err) {
             alert('Failed to export data');
         }
     };
 
-    if (!user) return <div className="p-8">Loading...</div>;
+    if (!user || !userWithDeletion) {
+        return <div className="p-8">Loading...</div>;
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="max-w-2xl mx-auto space-y-6">
                 <h1 className="text-3xl font-bold">Account Settings</h1>
 
+                <div className="mb-4">
+                    <p className="text-gray-600">Email: {user.email}</p>
+                </div>
+
                 {/* Deletion Warning Alert */}
-                {user.deletion_requested_at && (
+                {userWithDeletion.deletion_requested_at && (
                     <Alert variant="destructive">
                         <AlertTitle>⚠️ Account Deletion Scheduled</AlertTitle>
                         <AlertDescription>
-                            <p>
+                            <p className="mb-2">
                                 Your account will be permanently deleted in{' '}
                                 <strong>{daysRemaining} days</strong> (
                                 {deletionDate})
@@ -150,7 +165,7 @@ export default function SettingsPage() {
                                 className="mt-2"
                                 disabled={loading}
                             >
-                                Cancel Deletion
+                                {loading ? 'Canceling...' : 'Cancel Deletion'}
                             </Button>
                         </AlertDescription>
                     </Alert>
@@ -162,7 +177,7 @@ export default function SettingsPage() {
                         Export Your Data
                     </h2>
                     <p className="text-gray-600 mb-4">
-                        Download all your account data
+                        Download all your account data in JSON format
                     </p>
                     <Button onClick={handleExportData}>
                         Export Data (JSON)
@@ -170,7 +185,7 @@ export default function SettingsPage() {
                 </Card>
 
                 {/* Delete Account */}
-                {!user.deletion_requested_at && (
+                {!userWithDeletion.deletion_requested_at && (
                     <Card className="p-6 border-red-200">
                         <h2 className="text-xl font-semibold mb-2 text-red-600">
                             Delete Account
@@ -220,7 +235,10 @@ export default function SettingsPage() {
 
                                 <AlertDialogFooter>
                                     <AlertDialogCancel
-                                        onClick={() => setPassword('')}
+                                        onClick={() => {
+                                            setPassword('');
+                                            setError('');
+                                        }}
                                     >
                                         Cancel
                                     </AlertDialogCancel>
