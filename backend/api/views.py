@@ -655,3 +655,84 @@ def chapters_list(request):
     return Response({
         'chapters': serializer.data
     }, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def request_account_deletion(request):
+    """Start 7-day deletion countdown after password confirmation."""
+    password = request.data.get('password')
+    
+    if not password:
+        return Response({'error': 'Password is required'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not request.user.check_password(password):
+        return Response({'error': 'Invalid password'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    request.user.deletion_requested_at = timezone.now()
+    request.user.save()
+    
+    # TODO: Send email notification (template creation deferred)
+    
+    deletion_date = timezone.now() + timedelta(days=7)
+    
+    return Response({
+        'message': 'Account deletion scheduled for 7 days from now',
+        'deletion_date': deletion_date.isoformat(),
+        'can_cancel': True
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def cancel_account_deletion(request):
+    """Cancel pending account deletion."""
+    if not request.user.deletion_requested_at:
+        return Response(
+            {'error': 'No pending deletion request'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    request.user.deletion_requested_at = None
+    request.user.save()
+    
+    # TODO: Send cancellation confirmation email
+    
+    return Response({
+        'message': 'Account deletion cancelled successfully'
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@ratelimit(key='user', rate='10/h', method='GET')
+def export_user_data(request):
+    """Export all user data as JSON for GDPR compliance."""
+    user = request.user
+    
+    data = {
+        'user': {
+            'email': user.email,
+            'created_at': user.created_at.isoformat(),
+            'email_verified': user.email_verified,
+        },
+        'profile': {},
+        'habits': list(user.habits.values('habit', 'frequency', 'purpose', 'time', 'location', 'skipped')),
+        'study_notes': list(user.study_notes.values('id', 'verse_reference', 'content', 'created_at', 'updated_at')),
+        'recent_verses': list(user.recent_verses.values('book__name', 'chapter', 'last_accessed')),
+        'decks': list(user.decks.values('name', 'is_public', 'created_at')),
+    }
+    
+    # Include profile if exists
+    try:
+        profile = user.profile
+        data['profile'] = {
+            'display_name': profile.display_name,
+            'default_translation': profile.default_translation.code if profile.default_translation else None,
+            'review_goal_per_day': profile.review_goal_per_day,
+        }
+    except:
+        pass
+    
+    response = Response(data, status=status.HTTP_200_OK)
+    response['Content-Disposition'] = 'attachment; filename="user_data.json"'
+    return response

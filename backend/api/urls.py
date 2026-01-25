@@ -21,7 +21,10 @@ urlpatterns = [
     # Profile management
     path('profile/', views.UserProfileDetailView.as_view(), name='profile-detail'),
     path('profile/avatar/', views.upload_avatar, name='upload-avatar'),
-
+    # Account deletion
+    path('auth/request-deletion/', views.request_account_deletion, name='request-deletion'),
+    path('auth/cancel-deletion/', views.cancel_account_deletion, name='cancel-deletion'),
+    path('auth/export-data/', views.export_user_data, name='export-data'),
     # Content selection endpoints
     path('translations/', views.translations_list, name='translations-list'),
     path('books/', views.books_list, name='books-list'),
