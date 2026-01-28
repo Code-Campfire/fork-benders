@@ -184,7 +184,7 @@ SIMPLE_JWT = {
 # Email verification settings
 PASSWORD_RESET_TIMEOUT = 60 * 60 * 24  # 24 hours in seconds
 
-# SendGrid configuration
-SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
-SENDGRID_FROM_EMAIL = os.environ.get('SENDGRID_FROM_EMAIL', 'noreply@biblememorization.com')
+# Resend configuration
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
+RESEND_FROM_EMAIL = os.environ.get('RESEND_FROM_EMAIL', 'onboarding@resend.dev')
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')

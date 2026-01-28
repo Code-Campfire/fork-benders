@@ -121,6 +121,7 @@ docker compose exec backend python manage.py test api.tests.test_fetch_bible_dat
 - **All backend code changes auto-sync to Docker** via volume mount
 - **Dependencies:** After adding to `requirements.txt`, rebuild with `docker compose build backend`
 - **Frontend dependencies:** After adding to `package.json`, run `npm install` in frontend directory or rebuild with `docker compose build frontend`
+- **Email Service:** Resend (https://resend.com). Currently using sandbox `onboarding@resend.dev`. **TODO:** Update `RESEND_FROM_EMAIL` once a custom domain is acquired.
 - **Run tests before creating PRs**
 
 ---
