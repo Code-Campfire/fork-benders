@@ -48,6 +48,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     last_login = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
+    deletion_requested_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When user requested account deletion"
+    )
 
     objects = CustomUserManager()
 

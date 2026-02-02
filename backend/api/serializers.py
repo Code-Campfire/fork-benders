@@ -55,8 +55,8 @@ class UserLoginSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id', 'email', 'is_active', 'created_at', 'last_login')
-        read_only_fields = ('id', 'created_at', 'last_login')
+        fields = ('id', 'email', 'is_active', 'created_at', 'last_login', 'deletion_requested_at')
+        read_only_fields = ('id', 'created_at', 'last_login', 'deletion_requested_at')
 
 
 class HabitSerializer(serializers.ModelSerializer):
