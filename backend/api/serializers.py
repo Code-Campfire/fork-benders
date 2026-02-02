@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from .models import CustomUser, UserHabit, RecentVerse, StudyNote, UserProfile, Translation, Book
+from .models import CustomUser, UserHabit, RecentVerse, StudyNote, UserProfile, Translation, Book, Verse
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -167,3 +167,35 @@ class ChapterSerializer(serializers.Serializer):
 
     chapter = serializers.IntegerField()
     verse_count = serializers.IntegerField()
+
+
+class VerseQueryParamsSerializer(serializers.Serializer):
+    """Serializer for validating verses endpoint query parameters."""
+
+    translation = serializers.CharField(required=True, error_messages={
+        'required': 'Translation parameter is required.',
+        'blank': 'Translation parameter cannot be blank.'
+    })
+    book = serializers.IntegerField(required=True, error_messages={
+        'required': 'Book parameter is required.',
+        'invalid': 'Book parameter must be a valid integer.'
+    })
+    chapter = serializers.IntegerField(required=True, error_messages={
+        'required': 'Chapter parameter is required.',
+        'invalid': 'Chapter parameter must be a valid integer.'
+    })
+    verse = serializers.IntegerField(required=False, allow_null=True, error_messages={
+        'invalid': 'Verse parameter must be a valid integer.'
+    })
+
+
+class VerseSerializer(serializers.ModelSerializer):
+    """Serializer for Bible verses with nested translation and book info."""
+
+    translation = TranslationSerializer(read_only=True)
+    book = BookSerializer(read_only=True)
+
+    class Meta:
+        model = Verse
+        fields = ['id', 'translation', 'book', 'chapter', 'verse_num', 'text']
+        read_only_fields = ['id']

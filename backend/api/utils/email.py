@@ -5,8 +5,7 @@ from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+import resend
 
 logger = logging.getLogger(__name__)
 
@@ -121,29 +120,30 @@ def send_verification_email(user):
         © 2025 Bible Memorization App. All rights reserved.
         """
 
-        # Send email via SendGrid
-        if not settings.SENDGRID_API_KEY or settings.SENDGRID_API_KEY == 'your_sendgrid_api_key_here':
-            logger.warning(f"SendGrid API key not configured. Verification email for {user.email} not sent.")
+        # Send email via Resend
+        if not settings.RESEND_API_KEY:
+            logger.warning(f"Resend API key not configured. Verification email for {user.email} not sent.")
             logger.info(f"Verification URL (for testing): {verification_url}")
-            return (False, "SendGrid API key not configured. Check server logs for verification URL.")
+            return (False, "Resend API key not configured. Check server logs for verification URL.")
 
-        message = Mail(
-            from_email=settings.SENDGRID_FROM_EMAIL,
-            to_emails=user.email,
-            subject=subject,
-            plain_text_content=plain_content,
-            html_content=html_content
-        )
+        resend.api_key = settings.RESEND_API_KEY
 
-        sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
-        response = sg.send(message)
+        params = {
+            "from": settings.RESEND_FROM_EMAIL,
+            "to": [user.email],
+            "subject": subject,
+            "html": html_content,
+            "text": plain_content,
+        }
 
-        if response.status_code in [200, 201, 202]:
-            logger.info(f"Verification email sent successfully to {user.email}")
+        response = resend.Emails.send(params)
+
+        if response.get("id"):
+            logger.info(f"Verification email sent successfully to {user.email}, resend_id={response.get('id')}")
             return (True, None)
         else:
-            logger.error(f"SendGrid returned status {response.status_code} for {user.email}")
-            return (False, f"Email service returned status {response.status_code}")
+            logger.error(f"Resend failed for {user.email}: {response}")
+            return (False, "Email service failed to send")
 
     except Exception as e:
         logger.error(f"Error sending verification email to {user.email}: {str(e)}")
@@ -248,29 +248,30 @@ def send_password_reset_email(user, reset_url):
         © 2025 Bible Memorization App. All rights reserved.
         """
 
-        # Send email via SendGrid
-        if not settings.SENDGRID_API_KEY or settings.SENDGRID_API_KEY == 'your_sendgrid_api_key_here':
-            logger.warning(f"SendGrid API key not configured. Password reset email for {user.email} not sent.")
+        # Send email via Resend
+        if not settings.RESEND_API_KEY:
+            logger.warning(f"Resend API key not configured. Password reset email for {user.email} not sent.")
             logger.info(f"Password reset URL (for testing): {reset_url}")
-            return (False, "SendGrid API key not configured. Check server logs for reset URL.")
+            return (False, "Resend API key not configured. Check server logs for reset URL.")
 
-        message = Mail(
-            from_email=settings.SENDGRID_FROM_EMAIL,
-            to_emails=user.email,
-            subject=subject,
-            plain_text_content=plain_content,
-            html_content=html_content
-        )
+        resend.api_key = settings.RESEND_API_KEY
 
-        sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
-        response = sg.send(message)
+        params = {
+            "from": settings.RESEND_FROM_EMAIL,
+            "to": [user.email],
+            "subject": subject,
+            "html": html_content,
+            "text": plain_content,
+        }
 
-        if response.status_code in [200, 201, 202]:
-            logger.info(f"Password reset email sent successfully to {user.email}")
+        response = resend.Emails.send(params)
+
+        if response.get("id"):
+            logger.info(f"Password reset email sent successfully to {user.email}, resend_id={response.get('id')}")
             return (True, None)
         else:
-            logger.error(f"SendGrid returned status {response.status_code} for {user.email}")
-            return (False, f"Email service returned status {response.status_code}")
+            logger.error(f"Resend failed for {user.email}: {response}")
+            return (False, "Email service failed to send")
 
     except Exception as e:
         logger.error(f"Error sending password reset email to {user.email}: {str(e)}")
